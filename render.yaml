@@ -2,12 +2,9 @@ services:
   - type: web
     name: fante-api
     runtime: node
+    plan: free
     buildCommand: npm install
     startCommand: node server.js
-    disk:
-      name: fante-data
-      mountPath: /opt/render/project/src
-      sizeGB: 1
     envVars:
       - key: NODE_ENV
         value: production
