@@ -1,0 +1,6 @@
+node_modules/
+keys.db
+server.log
+server.pid
+*.db-journal
+.DS_Store

@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Learn Fante — API Platform</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #D4A017;
+      --gold-light: #F5C842;
+      --deep: #0F0800;
+      --deep2: #1C1000;
+      --bg: #FFF8EE;
+      --card: #FFFFFF;
+      --border: #E8D5B0;
+      --text: #1A0E00;
+      --muted: #8B6914;
+      --accent: #C4821A;
+      --green: #2E7D32;
+      --red: #C62828;
+    }
+
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+    header {
+      background: var(--deep); padding: 0 24px;
+      display: flex; align-items: center; gap: 20px;
+      position: sticky; top: 0; z-index: 200;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.5); height: 58px;
+    }
+    .logo { font-size: 1.35rem; font-weight: 800; color: var(--gold); letter-spacing: -0.5px; }
+    .logo span { color: #fff; font-weight: 300; }
+    .nav { display: flex; gap: 4px; flex: 1; }
+    .nav-btn {
+      padding: 6px 14px; border-radius: 8px; border: none;
+      background: transparent; color: #aaa; font-size: 0.85rem;
+      cursor: pointer; transition: all 0.15s; font-weight: 500;
+    }
+    .nav-btn:hover { color: var(--gold); }
+    .nav-btn.active { background: rgba(212,160,23,0.15); color: var(--gold); }
+    .key-chip {
+      font-size: 0.72rem; color: #666; background: #1a1000;
+      padding: 4px 10px; border-radius: 6px; font-family: monospace;
+      cursor: pointer; border: 1px solid #333; transition: border-color 0.2s; white-space: nowrap;
+    }
+    .key-chip:hover { border-color: var(--gold); color: var(--gold); }
+    .key-chip.has-key { color: #4CAF50; border-color: #2E7D32; }
+
+    .view { display: none; }
+    .view.active { display: block; }
+
+    /* Browse */
+    .search-row {
+      display: flex; gap: 12px; padding: 14px 24px;
+      background: var(--deep2); border-bottom: 1px solid #222; align-items: center;
+    }
+    .search-row input {
+      flex: 1; padding: 9px 16px; border-radius: 24px;
+      border: 1px solid #333; background: #0f0800;
+      color: #fff; font-size: 0.92rem; outline: none;
+    }
+    .search-row input:focus { border-color: var(--gold); }
+    .search-row input::placeholder { color: #555; }
+    .count-tag { font-size: 0.78rem; color: #666; white-space: nowrap; }
+
+    .cat-bar {
+      display: flex; gap: 8px; padding: 10px 24px;
+      overflow-x: auto; background: var(--deep2);
+      border-bottom: 1px solid #1a1000; scrollbar-width: none;
+    }
+    .cat-bar::-webkit-scrollbar { display: none; }
+    .cat-btn {
+      padding: 5px 12px; border-radius: 16px; border: 1px solid #333;
+      background: transparent; color: #888; font-size: 0.78rem;
+      cursor: pointer; white-space: nowrap; transition: all 0.15s;
+    }
+    .cat-btn.active { background: var(--gold); color: var(--deep); border-color: var(--gold); font-weight: 600; }
+    .cat-btn:hover:not(.active) { border-color: var(--gold); color: var(--gold); }
+
+    .word-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 10px; padding: 16px 24px;
+    }
+    .word-card {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px 16px;
+      display: flex; align-items: center; gap: 12px;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .word-card:hover { border-color: var(--gold); box-shadow: 0 2px 14px rgba(212,160,23,0.12); transform: translateY(-1px); }
+    .word-card.playing { border-color: var(--accent); background: #FFF3E0; }
+    .play-orb {
+      width: 42px; height: 42px; border-radius: 50%;
+      background: var(--gold); display: flex; align-items: center;
+      justify-content: center; flex-shrink: 0; font-size: 1rem; transition: transform 0.1s;
+    }
+    .word-card:hover .play-orb { transform: scale(1.1); }
+    .word-card.playing .play-orb { background: var(--accent); }
+    .wc-body { flex: 1; min-width: 0; }
+    .wc-en { font-weight: 600; font-size: 0.93rem; color: var(--text); }
+    .wc-ft { font-size: 0.85rem; color: var(--accent); font-style: italic; margin-top: 2px; }
+    .wc-cat { font-size: 0.7rem; color: #bbb; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .fav-star { background: none; border: none; font-size: 1rem; cursor: pointer; opacity: 0.3; transition: all 0.15s; }
+    .fav-star.on { opacity: 1; }
+
+    .empty { text-align: center; padding: 60px 24px; color: var(--muted); }
+    .empty .big { font-size: 2.5rem; margin-bottom: 10px; }
+
+    /* Quiz */
+    .quiz-wrap { max-width: 520px; margin: 32px auto; padding: 0 24px; }
+    .quiz-prog { font-size: 0.82rem; color: var(--muted); margin-bottom: 16px; text-align: center; }
+    .quiz-card-q {
+      background: var(--card); border: 2px solid var(--border);
+      border-radius: 18px; padding: 36px 28px; text-align: center;
+      margin-bottom: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+    }
+    .quiz-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--muted); margin-bottom: 10px; }
+    .quiz-word { font-size: 2rem; font-weight: 800; color: var(--text); margin-bottom: 10px; }
+    .quiz-play { padding: 9px 26px; border-radius: 20px; border: none; background: var(--gold); color: var(--deep); font-weight: 600; font-size: 0.88rem; cursor: pointer; }
+    .quiz-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .quiz-opt { padding: 15px; border-radius: 12px; border: 2px solid var(--border); background: var(--card); font-size: 0.92rem; cursor: pointer; transition: all 0.15s; }
+    .quiz-opt:hover { border-color: var(--gold); background: #FFFBF0; }
+    .quiz-opt.correct { border-color: var(--green); background: #E8F5E9; color: var(--green); font-weight: 600; }
+    .quiz-opt.wrong { border-color: var(--red); background: #FFEBEE; color: var(--red); }
+    .quiz-next { display: block; width: 100%; margin-top: 14px; padding: 13px; border-radius: 12px; border: none; background: var(--accent); color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer; }
+    .quiz-score { font-size: 3rem; font-weight: 800; color: var(--gold); margin: 12px 0; }
+    .quiz-restart { padding: 12px 32px; border-radius: 24px; border: none; background: var(--accent); color: #fff; font-size: 1rem; font-weight: 600; cursor: pointer; }
+
+    /* Developer */
+    .dev-wrap { max-width: 860px; margin: 0 auto; padding: 28px 24px; }
+    .dev-wrap h2 { font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; }
+    .dev-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 28px; }
+
+    .section-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 20px; }
+    .section-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 14px; }
+
+    .keygen-form { display: flex; flex-direction: column; gap: 12px; }
+    .keygen-row { display: flex; gap: 12px; }
+    .keygen-form input { flex: 1; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); font-size: 0.92rem; background: var(--bg); color: var(--text); outline: none; }
+    .keygen-form input:focus { border-color: var(--gold); }
+    .keygen-btn { padding: 11px 28px; border-radius: 10px; border: none; background: var(--gold); color: var(--deep); font-weight: 700; font-size: 0.95rem; cursor: pointer; }
+    .keygen-btn:hover { background: var(--gold-light); }
+
+    .key-result { margin-top: 16px; padding: 16px; border-radius: 10px; background: #0f0800; border: 1px solid #2E7D32; display: none; }
+    .key-result.show { display: block; }
+    .key-val { font-family: monospace; font-size: 0.95rem; color: #4CAF50; word-break: break-all; margin-bottom: 10px; }
+    .key-action-btn { padding: 6px 16px; border-radius: 8px; border: 1px solid #2E7D32; background: transparent; color: #4CAF50; font-size: 0.82rem; cursor: pointer; margin-right: 8px; }
+    .key-action-btn:hover { background: #2E7D32; color: #fff; }
+
+    .tester { display: flex; flex-direction: column; gap: 10px; }
+    .tester-row { display: flex; gap: 10px; }
+    .tester select, .tester input { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: #0f0800; color: #ccc; font-size: 0.85rem; outline: none; }
+    .tester select { min-width: 200px; }
+    .tester input { flex: 1; }
+    .test-btn { padding: 8px 20px; border-radius: 8px; border: none; background: var(--accent); color: #fff; font-weight: 600; font-size: 0.85rem; cursor: pointer; }
+    .test-output { background: #0f0800; border-radius: 10px; padding: 14px; font-family: monospace; font-size: 0.8rem; color: #aaa; min-height: 80px; white-space: pre-wrap; overflow-x: auto; border: 1px solid #2a1800; }
+
+    .ep-list { display: flex; flex-direction: column; gap: 8px; }
+    .endpoint { background: #0f0800; border-radius: 10px; border: 1px solid #2a1800; overflow: hidden; }
+    .ep-header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; cursor: pointer; }
+    .ep-header:hover { background: rgba(212,160,23,0.05); }
+    .method { padding: 3px 8px; border-radius: 5px; font-family: monospace; font-size: 0.75rem; font-weight: 700; }
+    .GET { background: #1565C0; color: #fff; }
+    .POST { background: #2E7D32; color: #fff; }
+    .ep-path { font-family: monospace; font-size: 0.88rem; color: #ddd; flex: 1; }
+    .ep-badge { font-size: 0.7rem; padding: 2px 7px; border-radius: 10px; background: #5a3e00; color: #FFD54F; }
+    .ep-desc { font-size: 0.78rem; color: #888; }
+    .ep-body { padding: 0 14px 14px; display: none; }
+    .ep-body.open { display: block; }
+    .ep-body pre { background: #1a1000; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 0.8rem; color: #ccc; overflow-x: auto; margin-top: 8px; white-space: pre-wrap; }
+
+    .integrations { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .int-card { background: #0f0800; border: 1px solid #2a1800; border-radius: 12px; padding: 18px; }
+    .int-card h4 { font-size: 0.95rem; margin-bottom: 8px; color: var(--gold); }
+    .int-card p { font-size: 0.82rem; color: #999; margin-bottom: 10px; }
+    .int-card pre { background: #1a1000; border-radius: 8px; padding: 12px; font-family: monospace; font-size: 0.72rem; color: #aaa; overflow-x: auto; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+    .copy-code { margin-top: 8px; padding: 5px 12px; border-radius: 6px; border: 1px solid #333; background: transparent; color: #888; font-size: 0.75rem; cursor: pointer; }
+    .copy-code:hover { border-color: var(--gold); color: var(--gold); }
+
+    @media (max-width: 640px) {
+      .integrations { grid-template-columns: 1fr; }
+      .word-grid { grid-template-columns: 1fr; }
+      .quiz-opts { grid-template-columns: 1fr; }
+      .keygen-row { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🇬🇭 Fante<span>API</span></div>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showView('browse')">Browse</button>
+    <button class="nav-btn" onclick="showView('quiz')">Quiz</button>
+    <button class="nav-btn" onclick="showView('favs')">Favorites</button>
+    <button class="nav-btn" onclick="showView('developer')">🔑 Developer</button>
+  </nav>
+  <div class="key-chip" id="keyChip" onclick="showView('developer')">No key</div>
+</header>
+
+<!-- BROWSE -->
+<div class="view active" id="view-browse">
+  <div class="search-row">
+    <input id="searchInput" type="text" placeholder="Search English or Fante..." oninput="filterWords()">
+    <span class="count-tag" id="countTag">—</span>
+  </div>
+  <div class="cat-bar" id="catBar"></div>
+  <div class="word-grid" id="wordGrid"></div>
+</div>
+
+<!-- QUIZ -->
+<div class="view" id="view-quiz">
+  <div class="quiz-wrap" id="quizWrap"></div>
+</div>
+
+<!-- FAVS -->
+<div class="view" id="view-favs">
+  <div class="search-row">
+    <input type="text" placeholder="Search favorites..." oninput="filterFavs(this.value)">
+    <span class="count-tag" id="favCount">—</span>
+  </div>
+  <div class="word-grid" id="favGrid"></div>
+</div>
+
+<!-- DEVELOPER -->
+<div class="view" id="view-developer">
+<div class="dev-wrap">
+  <h2>🔑 Fante API — Developer Hub</h2>
+  <p class="dev-sub">Generate your API key and build Fante-speaking bots for Telegram, WhatsApp, and more. 906 words · 904 audio files · 30 categories.</p>
+
+  <div class="section-card">
+    <h3>⚡ Generate Your API Key</h3>
+    <div class="keygen-form">
+      <div class="keygen-row">
+        <input id="kgName" type="text" placeholder="Your name or bot name (required)">
+        <input id="kgEmail" type="email" placeholder="Email (optional)">
+      </div>
+      <button class="keygen-btn" onclick="generateKey()">Generate Free API Key</button>
+    </div>
+    <div class="key-result" id="keyResult">
+      <div style="font-size:0.75rem;color:#888;margin-bottom:6px;">Your API Key — save this now:</div>
+      <div class="key-val" id="keyVal"></div>
+      <button class="key-action-btn" onclick="copyKey()">Copy Key</button>
+      <button class="key-action-btn" onclick="activateKey()">Use This Key ✓</button>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <h3>🧪 Live API Tester</h3>
+    <div class="tester">
+      <div class="tester-row">
+        <select id="testEndpoint" onchange="document.getElementById('testUrl').value=this.value">
+          <option value="/api/words?limit=5">GET /api/words</option>
+          <option value="/api/categories">GET /api/categories</option>
+          <option value="/api/translate?q=hello&dir=en-fante">GET /api/translate</option>
+          <option value="/api/chat?message=how do you say water">GET /api/chat</option>
+          <option value="/api/random">GET /api/random</option>
+          <option value="/api/random?category=greeting">GET /api/random?category=greeting</option>
+          <option value="/api/words/1">GET /api/words/:id</option>
+          <option value="/api/keys/me">GET /api/keys/me</option>
+          <option value="/api/health">GET /api/health</option>
+        </select>
+        <input id="testUrl" type="text" value="/api/words?limit=5">
+        <button class="test-btn" onclick="runTest()">Run ▶</button>
+      </div>
+      <div class="test-output" id="testOutput">// Select an endpoint and click Run</div>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <h3>📚 API Reference</h3>
+    <p style="font-size:0.82rem;color:var(--muted);margin-bottom:14px;">All endpoints except <code>/api/keys/generate</code> and <code>/api/health</code> require <code>X-Api-Key</code> header or <code>?api_key=</code> param.</p>
+    <div class="ep-list" id="epList"></div>
+  </div>
+
+  <div class="section-card">
+    <h3>🤖 Bot Integration Guides</h3>
+    <div class="integrations" id="intGuides"></div>
+  </div>
+</div>
+</div>
+
+<script>
+let allWords = [], filtered = [], activeCategory = 'all';
+let currentAudio = null, playingId = null;
+let favorites = JSON.parse(localStorage.getItem('fanteFavs') || '[]');
+let apiKey = localStorage.getItem('fanteApiKey') || '';
+let quizState = {};
+
+const CAT = {
+  all:'All', shopping:'Shopping', food_drinks:'Food & Drinks',
+  profession:'Professions', professions:'Professions', transport:'Transport',
+  general_conversation:'Conversation', time_date:'Time & Date',
+  electronics:'Electronics', places:'Places', animals:'Animals',
+  human_anatomy:'Body Parts', well_being:'Well-being', housing:'Housing',
+  fruits_nuts:'Fruits & Nuts', subjects:'Subjects', greeting:'Greetings',
+  dating:'Dating', hobbies:'Hobbies', directions:'Directions',
+  family:'Family', fashion:'Fashion', cooking:'Cooking', colours:'Colours',
+  tourism:'Tourism', emergency:'Emergency', weather:'Weather',
+  essential_vocabulary:'Essential', numbers:'Numbers', conjugation:'Conjugation',
+};
+
+async function init() {
+  const r = await fetch('/data.json');
+  allWords = await r.json();
+  const cats = ['all', ...[...new Set(allWords.map(w=>w.category).filter(Boolean))].sort()];
+  const bar = document.getElementById('catBar');
+  cats.forEach(cat => {
+    const b = document.createElement('button');
+    b.className = 'cat-btn' + (cat==='all'?' active':'');
+    b.textContent = CAT[cat] || cat;
+    b.dataset.cat = cat;
+    b.onclick = () => selectCat(cat);
+    bar.appendChild(b);
+  });
+  updateKeyChip();
+  filterWords();
+  buildDocs();
+  buildIntegrations();
+}
+
+function showView(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  const idx = ['browse','quiz','favs','developer'].indexOf(name);
+  if (idx >= 0) document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+  if (name === 'quiz') startQuiz();
+  if (name === 'favs') renderFavs('');
+}
+
+function selectCat(cat) {
+  activeCategory = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.toggle('active', b.dataset.cat===cat));
+  filterWords();
+}
+
+function filterWords() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  filtered = allWords.filter(w => {
+    const cm = activeCategory==='all' || w.category===activeCategory;
+    const sm = !q || w.english.toLowerCase().includes(q) || (w.fante||'').toLowerCase().includes(q);
+    return cm && sm;
+  });
+  document.getElementById('countTag').textContent = filtered.length + ' words';
+  renderGrid(filtered, 'wordGrid');
+}
+
+function renderGrid(words, gridId) {
+  const grid = document.getElementById(gridId);
+  if (!words.length) { grid.innerHTML = '<div class="empty"><div class="big">🔍</div><div>No words found</div></div>'; return; }
+  grid.innerHTML = words.map(w => `
+    <div class="word-card${playingId===w.id?' playing':''}" id="wc-${w.id}" onclick="playWord(${w.id})">
+      <div class="play-orb">${playingId===w.id?'🔊':'▶️'}</div>
+      <div class="wc-body">
+        <div class="wc-en">${w.english}</div>
+        <div class="wc-ft">${w.fante||''}</div>
+        <div class="wc-cat">${CAT[w.category]||w.category||''}</div>
+      </div>
+      <button class="fav-star${favorites.includes(w.id)?' on':''}" onclick="event.stopPropagation();toggleFav(${w.id})">★</button>
+    </div>`).join('');
+}
+
+function playWord(id) {
+  const w = allWords.find(x => x.id===id);
+  if (!w) return;
+  if (currentAudio) currentAudio.pause();
+  if (playingId) {
+    const old = document.getElementById('wc-'+playingId);
+    if (old) { old.classList.remove('playing'); old.querySelector('.play-orb').textContent='▶️'; }
+  }
+  playingId = id;
+  const card = document.getElementById('wc-'+id);
+  if (card) { card.classList.add('playing'); card.querySelector('.play-orb').textContent='🔊'; }
+  const audio = new Audio('/audio/'+w.sound+'.mp3');
+  currentAudio = audio;
+  audio.play().catch(()=>{});
+  audio.onended = () => {
+    playingId = null;
+    if (card) { card.classList.remove('playing'); card.querySelector('.play-orb').textContent='▶️'; }
+    currentAudio = null;
+  };
+}
+
+function toggleFav(id) {
+  favorites = favorites.includes(id) ? favorites.filter(f=>f!==id) : [...favorites, id];
+  localStorage.setItem('fanteFavs', JSON.stringify(favorites));
+  document.querySelectorAll(`#wc-${id} .fav-star`).forEach(b => b.classList.toggle('on', favorites.includes(id)));
+}
+
+function filterFavs(q) {
+  const lq = q.toLowerCase();
+  const words = allWords.filter(w => favorites.includes(w.id) && (!lq || w.english.toLowerCase().includes(lq) || (w.fante||'').toLowerCase().includes(lq)));
+  document.getElementById('favCount').textContent = favorites.length + ' saved';
+  renderGrid(words, 'favGrid');
+}
+function renderFavs(q) { filterFavs(q); }
+
+// Quiz
+function startQuiz() {
+  const pool = [...(activeCategory==='all' ? allWords : filtered)].filter(w=>w.fante);
+  shuffle(pool);
+  quizState = { words: pool.slice(0,20), idx:0, score:0, answered:false };
+  renderQuiz();
+}
+
+function renderQuiz() {
+  const { words, idx, score } = quizState;
+  const wrap = document.getElementById('quizWrap');
+  if (idx >= words.length) {
+    wrap.innerHTML = `<div class="quiz-card-q" style="text-align:center">
+      <div class="quiz-label">Quiz Complete!</div>
+      <div class="quiz-score">${score}/${words.length}</div>
+      <div style="color:var(--muted);margin-bottom:20px">${score===words.length?'Perfect! 🎉':score>=words.length*0.7?'Great job! 👏':'Keep practicing! 💪'}</div>
+      <button class="quiz-restart" onclick="startQuiz()">Play Again</button></div>`;
+    return;
+  }
+  const w = words[idx];
+  const others = allWords.filter(x=>x.id!==w.id&&x.fante);
+  shuffle(others);
+  const opts = [w,...others.slice(0,3)];
+  shuffle(opts);
+  wrap.innerHTML = `
+    <div class="quiz-prog">${idx+1} / ${words.length} — Score: ${score}</div>
+    <div class="quiz-card-q">
+      <div class="quiz-label">What is the Fante word for…</div>
+      <div class="quiz-word">${w.english}</div>
+      <button class="quiz-play" onclick="playWord(${w.id})">🔊 Listen</button>
+    </div>
+    <div class="quiz-opts" id="qOpts">
+      ${opts.map(o=>`<button class="quiz-opt" data-id="${o.id}" onclick="answerQuiz(${o.id},${w.id})">${o.fante}</button>`).join('')}
+    </div>
+    <div id="qNext"></div>`;
+}
+
+function answerQuiz(sel, correct) {
+  if (quizState.answered) return;
+  quizState.answered = true;
+  if (sel===correct) { quizState.score++; playWord(correct); }
+  document.querySelectorAll('.quiz-opt').forEach(btn => {
+    const id = Number(btn.dataset.id);
+    if (id===correct) btn.classList.add('correct');
+    else if (id===sel&&sel!==correct) btn.classList.add('wrong');
+    btn.style.cursor='default';
+  });
+  const b = document.createElement('button');
+  b.className='quiz-next';
+  b.textContent = quizState.idx+1>=quizState.words.length?'See Results →':'Next →';
+  b.onclick = () => { quizState.idx++; quizState.answered=false; renderQuiz(); };
+  document.getElementById('qNext').appendChild(b);
+}
+
+// Developer
+function updateKeyChip() {
+  const chip = document.getElementById('keyChip');
+  if (apiKey) { chip.textContent=apiKey.slice(0,16)+'…'; chip.classList.add('has-key'); }
+  else { chip.textContent='No key'; chip.classList.remove('has-key'); }
+}
+
+async function generateKey() {
+  const name = document.getElementById('kgName').value.trim();
+  const email = document.getElementById('kgEmail').value.trim();
+  if (!name) { alert('Enter a name for your API key.'); return; }
+  const r = await fetch('/api/keys/generate', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({name,email}) });
+  const data = await r.json();
+  if (!data.success) { alert('Error: '+(data.error||'unknown')); return; }
+  document.getElementById('keyVal').textContent = data.api_key;
+  document.getElementById('keyResult').classList.add('show');
+}
+
+function copyKey() {
+  navigator.clipboard.writeText(document.getElementById('keyVal').textContent);
+  event.target.textContent='Copied!';
+  setTimeout(()=>event.target.textContent='Copy Key',1500);
+}
+
+function activateKey() {
+  apiKey = document.getElementById('keyVal').textContent;
+  localStorage.setItem('fanteApiKey', apiKey);
+  updateKeyChip();
+  event.target.textContent='Active ✓';
+  document.getElementById('testOutput').textContent='// Key active! Try running a request.';
+}
+
+async function runTest() {
+  const url = document.getElementById('testUrl').value.trim();
+  const out = document.getElementById('testOutput');
+  out.textContent='// Loading…';
+  try {
+    const headers = apiKey ? {'X-Api-Key': apiKey} : {};
+    const r = await fetch(url, {headers});
+    const data = await r.json();
+    out.textContent = JSON.stringify(data, null, 2);
+  } catch(e) { out.textContent='// Error: '+e.message; }
+}
+
+function buildDocs() {
+  const eps = [
+    {m:'POST',p:'/api/keys/generate',auth:false,d:'Generate API key',
+     req:'{ "name": "MyBot", "email": "you@example.com" }',
+     res:'{ "success": true, "api_key": "fante_abc123...", "base_url": "..." }'},
+    {m:'GET',p:'/api/words',auth:true,d:'List words — ?category=greeting&search=hello&limit=50&offset=0',
+     res:'{ "total": 906, "count": 5, "words": [{...}] }'},
+    {m:'GET',p:'/api/words/:id',auth:true,d:'Get word by ID',
+     res:'{ "id": 1, "english": "Hello", "fante": "...", "category": "greeting" }'},
+    {m:'GET',p:'/api/categories',auth:true,d:'All categories with counts',
+     res:'[{ "name": "greeting", "count": 12 }, ...]'},
+    {m:'GET',p:'/api/translate',auth:true,d:'Translate — ?q=hello&dir=en-fante (or fante-en)',
+     res:'{ "english": "Hello", "fante": "...", "audio_url": "http://localhost:3747/audio/..." }'},
+    {m:'GET',p:'/api/chat',auth:true,d:'Chatbot NLU — ?message=how do you say water',
+     res:'{ "reply": "...", "audio_url": "...", "word": {...} }'},
+    {m:'GET',p:'/api/random',auth:true,d:'Random word — ?category=animals (optional)',
+     res:'{ "id": 42, "english": "Cat", "fante": "...", "audio_url": "..." }'},
+    {m:'GET',p:'/api/keys/me',auth:true,d:'Your key info & request count',
+     res:'{ "key": "fante_...", "name": "...", "request_count": 42 }'},
+    {m:'GET',p:'/api/health',auth:false,d:'Health check — no key required',
+     res:'{ "status": "ok", "words": 906, "version": "1.0.0" }'},
+  ];
+  document.getElementById('epList').innerHTML = eps.map((ep,i)=>`
+    <div class="endpoint">
+      <div class="ep-header" onclick="document.getElementById('epb-${i}').classList.toggle('open')">
+        <span class="method ${ep.m}">${ep.m}</span>
+        <span class="ep-path">${ep.p}</span>
+        ${ep.auth?'<span class="ep-badge">🔑 auth</span>':''}
+        <span class="ep-desc">${ep.d}</span>
+      </div>
+      <div class="ep-body" id="epb-${i}">
+        ${ep.req?`<div style="font-size:0.75rem;color:#888;margin-top:8px">Body:</div><pre>${ep.req}</pre>`:''}
+        <div style="font-size:0.75rem;color:#888;margin-top:8px">Response:</div>
+        <pre>${ep.res}</pre>
+      </div>
+    </div>`).join('');
+}
+
+function buildIntegrations() {
+  const key = apiKey || 'YOUR_FANTE_API_KEY';
+  const base = 'http://localhost:3747';
+  const guides = [
+    { icon:'✈️', title:'Telegram Bot (Node.js)', desc:'Send Fante translations and audio in Telegram chats.',
+      code:`// npm install node-telegram-bot-api node-fetch
+const TelegramBot = require('node-telegram-bot-api');
+const fetch = require('node-fetch');
+
+const bot = new TelegramBot('YOUR_TELEGRAM_BOT_TOKEN', { polling: true });
+const API_KEY = '${key}';
+const BASE = '${base}/api';
+
+// Any message → auto-translate via chat endpoint
+bot.on('message', async (msg) => {
+  const res = await fetch(BASE + '/chat?message=' + encodeURIComponent(msg.text || ''),
+    { headers: { 'X-Api-Key': API_KEY } });
+  const data = await res.json();
+  await bot.sendMessage(msg.chat.id, data.reply);
+  if (data.audio_url) await bot.sendAudio(msg.chat.id, data.audio_url);
+});
+
+// /translate <word>
+bot.onText(/\\/translate (.+)/, async (msg, match) => {
+  const res = await fetch(BASE + '/translate?q=' + encodeURIComponent(match[1]),
+    { headers: { 'X-Api-Key': API_KEY } });
+  const data = await res.json();
+  if (data.fante) {
+    bot.sendMessage(msg.chat.id, data.english + ' → ' + data.fante);
+    bot.sendAudio(msg.chat.id, data.audio_url);
+  } else bot.sendMessage(msg.chat.id, 'No translation found.');
+});
+
+// /learn — random word
+bot.onText(/\\/learn/, async (msg) => {
+  const res = await fetch(BASE + '/random', { headers: { 'X-Api-Key': API_KEY } });
+  const w = await res.json();
+  bot.sendMessage(msg.chat.id, '📖 ' + w.english + ' = ' + w.fante);
+  bot.sendAudio(msg.chat.id, w.audio_url);
+});`},
+    { icon:'📱', title:'WhatsApp Bot (Node.js)', desc:'Reply with Fante in WhatsApp using whatsapp-web.js.',
+      code:`// npm install whatsapp-web.js node-fetch qrcode-terminal
+const { Client, LocalAuth } = require('whatsapp-web.js');
+const fetch = require('node-fetch');
+const qrcode = require('qrcode-terminal');
+
+const API_KEY = '${key}';
+const BASE = '${base}/api';
+
+const client = new Client({ authStrategy: new LocalAuth() });
+client.on('qr', qr => qrcode.generate(qr, { small: true }));
+client.on('ready', () => console.log('WhatsApp Fante bot ready!'));
+
+client.on('message', async (msg) => {
+  const text = msg.body.trim();
+
+  if (text.startsWith('!fante ')) {
+    const word = text.slice(7).trim();
+    const res = await fetch(BASE + '/translate?q=' + encodeURIComponent(word),
+      { headers: { 'X-Api-Key': API_KEY } });
+    const data = await res.json();
+    msg.reply(data.fante ? word + ' → *' + data.fante + '*' : 'No translation found.');
+  }
+
+  if (text === '!learn') {
+    const res = await fetch(BASE + '/random', { headers: { 'X-Api-Key': API_KEY } });
+    const w = await res.json();
+    msg.reply('📖 *' + w.english + '* = _' + w.fante + '_');
+  }
+
+  if (text.startsWith('!category ')) {
+    const cat = text.slice(10).trim();
+    const res = await fetch(BASE + '/words?category=' + cat + '&limit=5',
+      { headers: { 'X-Api-Key': API_KEY } });
+    const data = await res.json();
+    const list = data.words.map(w => '• ' + w.english + ' → ' + w.fante).join('\\n');
+    msg.reply(list || 'Category not found.');
+  }
+});
+
+client.initialize();`},
+    { icon:'🐍', title:'Python (requests)', desc:'Generic Python — works with any platform or framework.',
+      code:`import requests
+
+API_KEY = '${key}'
+BASE = '${base}/api'
+H = {'X-Api-Key': API_KEY}
+
+def translate(word, direction='en-fante'):
+    r = requests.get(BASE+'/translate', params={'q':word,'dir':direction}, headers=H)
+    return r.json()
+
+def chat(message):
+    r = requests.get(BASE+'/chat', params={'message':message}, headers=H)
+    return r.json()
+
+def random_word(category=None):
+    params = {'category':category} if category else {}
+    return requests.get(BASE+'/random', params=params, headers=H).json()
+
+def search(query, category=None):
+    params = {'search':query,'limit':10}
+    if category: params['category'] = category
+    return requests.get(BASE+'/words', params=params, headers=H).json()
+
+# Examples
+print(translate('good morning'))
+# {'english':'Good morning','fante':'Maakye','audio_url':'...'}
+
+print(chat('how do you say water'))
+# {'reply': '"Can I have some water" in Fante is "..."', ...}
+
+print(random_word('animals'))
+# {'english':'Cat','fante':'...','audio_url':'...'}`},
+    { icon:'🌐', title:'cURL / REST', desc:'Use from any language, shell, or API client.',
+      code:`# Translate English → Fante
+curl -H "X-Api-Key: ${key}" \\
+  "${base}/api/translate?q=hello"
+
+# Translate Fante → English
+curl -H "X-Api-Key: ${key}" \\
+  "${base}/api/translate?q=Maakye&dir=fante-en"
+
+# Chat / NLU
+curl -H "X-Api-Key: ${key}" \\
+  "${base}/api/chat?message=how+do+you+say+water"
+
+# Random word (from a category)
+curl -H "X-Api-Key: ${key}" \\
+  "${base}/api/random?category=greeting"
+
+# Browse all greetings
+curl -H "X-Api-Key: ${key}" \\
+  "${base}/api/words?category=greeting&limit=20"
+
+# Get audio file
+curl "${base}/audio/hello_hlo.mp3" > hello.mp3
+
+# Check key usage
+curl -H "X-Api-Key: ${key}" \\
+  "${base}/api/keys/me"`},
+  ];
+
+  document.getElementById('intGuides').innerHTML = guides.map(g => {
+    const codeId = 'code-' + g.title.replace(/\W/g,'');
+    return `<div class="int-card">
+      <h4>${g.icon} ${g.title}</h4>
+      <p>${g.desc}</p>
+      <pre id="${codeId}">${g.code}</pre>
+      <button class="copy-code" onclick="navigator.clipboard.writeText(document.getElementById('${codeId}').textContent);this.textContent='Copied!';setTimeout(()=>this.textContent='Copy Code',1500)">Copy Code</button>
+    </div>`;
+  }).join('');
+}
+
+function shuffle(a) {
+  for (let i=a.length-1;i>0;i--) { const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+}
+
+init();
+</script>
+</body>
+</html>
