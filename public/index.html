@@ -259,6 +259,8 @@
           <option value="/api/random">GET /api/random</option>
           <option value="/api/random?category=greeting">GET /api/random?category=greeting</option>
           <option value="/api/words/1">GET /api/words/:id</option>
+          <option value="/api/quiz?count=3">GET /api/quiz</option>
+          <option value="/api/word-of-the-day">GET /api/word-of-the-day</option>
           <option value="/api/keys/me">GET /api/keys/me</option>
           <option value="/api/health">GET /api/health</option>
         </select>
@@ -513,10 +515,14 @@ function buildDocs() {
      res:'{ "reply": "...", "audio_url": "...", "word": {...} }'},
     {m:'GET',p:'/api/random',auth:true,d:'Random word — ?category=animals (optional)',
      res:'{ "id": 42, "english": "Cat", "fante": "...", "audio_url": "..." }'},
+    {m:'GET',p:'/api/quiz',auth:true,d:'Multiple-choice quiz — ?count=5&category=animals (optional)',
+     res:'{ "count": 5, "questions": [{ "question": "...", "choices": [...], "answer": "..." }] }'},
+    {m:'GET',p:'/api/word-of-the-day',auth:true,d:'Deterministic daily word (changes every UTC day)',
+     res:'{ "date": "2026-07-13", "english": "...", "fante": "...", "audio_url": "..." }'},
     {m:'GET',p:'/api/keys/me',auth:true,d:'Your key info & request count',
      res:'{ "key": "fante_...", "name": "...", "request_count": 42 }'},
     {m:'GET',p:'/api/health',auth:false,d:'Health check — no key required',
-     res:'{ "status": "ok", "words": 906, "version": "1.0.0" }'},
+     res:'{ "status": "ok", "words": 906, "version": "2.0.0" }'},
   ];
   document.getElementById('epList').innerHTML = eps.map((ep,i)=>`
     <div class="endpoint">
