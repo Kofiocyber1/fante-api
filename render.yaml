@@ -5,6 +5,11 @@ services:
     plan: free
     buildCommand: npm install
     startCommand: node server.js
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
+      - key: SUPABASE_URL
+        value: https://hpzqtolrcuehfnqkbole.supabase.co
+      - key: SUPABASE_KEY
+        value: sb_publishable_bdFQ5vvUyBPrh9zCHNx8ZA_YdPzw42m

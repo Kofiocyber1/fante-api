@@ -1,16 +1,58 @@
 const express = require('express');
 const cors = require('cors');
-const { v4: uuidv4 } = require('uuid');
-const Database = require('better-sqlite3');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 const path = require('path');
 const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3747;
+const VERSION = '2.0.0';
 
+// ── Supabase (API key storage) ────────────────────────────────────────────────
+const SUPABASE_URL = process.env.SUPABASE_URL || 'https://hpzqtolrcuehfnqkbole.supabase.co';
+const SUPABASE_KEY = process.env.SUPABASE_KEY || 'sb_publishable_bdFQ5vvUyBPrh9zCHNx8ZA_YdPzw42m';
+
+async function rpc(fn, args) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(args),
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!res.ok) {
+    const body = await res.text().catch(() => '');
+    throw new Error(`Supabase RPC ${fn} failed (${res.status}): ${body.slice(0, 200)}`);
+  }
+  return res.json();
+}
+
+// ── Middleware ────────────────────────────────────────────────────────────────
+app.set('trust proxy', 1); // behind Render's proxy
+app.use(helmet({ contentSecurityPolicy: false })); // landing page uses inline styles/scripts
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10kb' }));
 app.use(express.static(path.join(__dirname, 'public')));
+
+const apiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 120, // 120 req/min per IP
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: 'Too many requests. Limit is 120/minute.' },
+});
+const keygenLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  limit: 10, // 10 new keys/hour per IP
+  standardHeaders: 'draft-7',
+  legacyHeaders: false,
+  message: { error: 'Too many keys generated. Try again later.' },
+});
+app.use('/api/', apiLimiter);
 
 // ── Data ──────────────────────────────────────────────────────────────────────
 const words = JSON.parse(fs.readFileSync(path.join(__dirname, 'public', 'data.json'), 'utf8'));
@@ -18,76 +60,51 @@ const byId = new Map(words.map(w => [w.id, w]));
 const byEnglish = new Map(words.map(w => [w.english.toLowerCase(), w]));
 const byFante = new Map(words.filter(w => w.fante).map(w => [w.fante.toLowerCase(), w]));
 
-// ── API Key DB ────────────────────────────────────────────────────────────────
-const keysDb = new Database(path.join(__dirname, 'keys.db'));
-keysDb.exec(`
-  CREATE TABLE IF NOT EXISTS api_keys (
-    key TEXT PRIMARY KEY,
-    name TEXT,
-    email TEXT,
-    created_at TEXT,
-    last_used TEXT,
-    request_count INTEGER DEFAULT 0,
-    active INTEGER DEFAULT 1
-  );
-  CREATE TABLE IF NOT EXISTS request_log (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    key TEXT, endpoint TEXT, query TEXT, ts TEXT
-  );
-`);
-
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function baseUrl(req) {
-  return `${req.protocol}://${req.get('host')}`;
-}
-
-function audioUrl(req, sound) {
-  return `${baseUrl(req)}/audio/${sound}.mp3`;
-}
+const baseUrl = req => `${req.protocol}://${req.get('host')}`;
+const audioUrl = (req, sound) => `${baseUrl(req)}/audio/${sound}.mp3`;
+const asyncH = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
 
 // ── Auth middleware ───────────────────────────────────────────────────────────
-function requireKey(req, res, next) {
+const requireKey = asyncH(async (req, res, next) => {
   const key = req.headers['x-api-key'] || req.query.api_key;
   if (!key) return res.status(401).json({ error: 'Missing API key. Pass as X-Api-Key header or ?api_key= param.' });
-  const row = keysDb.prepare('SELECT * FROM api_keys WHERE key = ? AND active = 1').get(key);
+  if (typeof key !== 'string' || key.length > 100) return res.status(403).json({ error: 'Invalid or revoked API key.' });
+  const row = await rpc('fante_check_key', { p_key: key, p_endpoint: req.path, p_query: req.query });
   if (!row) return res.status(403).json({ error: 'Invalid or revoked API key.' });
-  keysDb.prepare('UPDATE api_keys SET last_used = ?, request_count = request_count + 1 WHERE key = ?')
-    .run(new Date().toISOString(), key);
-  keysDb.prepare('INSERT INTO request_log (key, endpoint, query, ts) VALUES (?, ?, ?, ?)')
-    .run(key, req.path, JSON.stringify(req.query), new Date().toISOString());
   req.apiKey = row;
   next();
-}
+});
 
 // ── Key endpoints ─────────────────────────────────────────────────────────────
-app.post('/api/keys/generate', (req, res) => {
+app.post('/api/keys/generate', keygenLimiter, asyncH(async (req, res) => {
   const { name, email } = req.body || {};
-  if (!name) return res.status(400).json({ error: 'name is required' });
-  const key = 'fante_' + uuidv4().replace(/-/g, '');
-  keysDb.prepare('INSERT INTO api_keys (key, name, email, created_at) VALUES (?, ?, ?, ?)')
-    .run(key, name, email || '', new Date().toISOString());
+  if (!name || typeof name !== 'string' || !name.trim()) return res.status(400).json({ error: 'name is required' });
+  if (name.length > 100 || (email && String(email).length > 200)) return res.status(400).json({ error: 'name/email too long' });
+  const out = await rpc('fante_generate_key', { p_name: name.trim(), p_email: email ? String(email) : '' });
   res.json({
-    success: true, api_key: key, name,
-    created_at: new Date().toISOString(),
+    success: true, ...out,
     base_url: `${baseUrl(req)}/api`,
     docs_url: `${baseUrl(req)}/#developer`,
   });
-});
+}));
 
 app.get('/api/keys/me', requireKey, (req, res) => res.json(req.apiKey));
 
 // ── Vocab endpoints ───────────────────────────────────────────────────────────
 app.get('/api/words', requireKey, (req, res) => {
   let result = words;
-  const { category, search, limit = 50, offset = 0 } = req.query;
+  const { category, search } = req.query;
+  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 50, 1), 200);
+  const offset = Math.max(parseInt(req.query.offset, 10) || 0, 0);
   if (category) result = result.filter(w => w.category === category);
   if (search) {
-    const q = search.toLowerCase();
+    const q = String(search).toLowerCase();
     result = result.filter(w => w.english.toLowerCase().includes(q) || (w.fante || '').toLowerCase().includes(q));
   }
   const total = result.length;
-  result = result.slice(Number(offset), Number(offset) + Number(limit));
-  res.json({ total, count: result.length, offset: Number(offset), words: result });
+  result = result.slice(offset, offset + limit);
+  res.json({ total, count: result.length, offset, words: result });
 });
 
 app.get('/api/words/:id', requireKey, (req, res) => {
@@ -105,7 +122,7 @@ app.get('/api/categories', requireKey, (req, res) => {
 app.get('/api/translate', requireKey, (req, res) => {
   const { q, dir = 'en-fante' } = req.query;
   if (!q) return res.status(400).json({ error: 'Missing ?q= query' });
-  const query = q.toLowerCase().trim();
+  const query = String(q).toLowerCase().trim();
   const match = dir === 'en-fante'
     ? (byEnglish.get(query) || words.find(w => w.english.toLowerCase().includes(query)))
     : (byFante.get(query) || words.find(w => (w.fante || '').toLowerCase().includes(query)));
@@ -117,8 +134,53 @@ app.get('/api/translate', requireKey, (req, res) => {
   });
 });
 
+app.get('/api/random', requireKey, (req, res) => {
+  const { category } = req.query;
+  const pool = category ? words.filter(w => w.category === category) : words;
+  if (!pool.length) return res.status(404).json({ error: 'No words in that category' });
+  const w = pool[Math.floor(Math.random() * pool.length)];
+  res.json({ ...w, audio_url: audioUrl(req, w.sound) });
+});
+
+// ── NEW: Word of the day (deterministic per UTC date) ─────────────────────────
+app.get('/api/word-of-the-day', requireKey, (req, res) => {
+  const today = new Date().toISOString().slice(0, 10);
+  let hash = 0;
+  for (const c of today) hash = (hash * 31 + c.charCodeAt(0)) >>> 0;
+  const w = words[hash % words.length];
+  res.json({ date: today, ...w, audio_url: audioUrl(req, w.sound) });
+});
+
+// ── NEW: Quiz (multiple choice) ───────────────────────────────────────────────
+app.get('/api/quiz', requireKey, (req, res) => {
+  const { category, count = 1 } = req.query;
+  const n = Math.min(Math.max(parseInt(count, 10) || 1, 1), 20);
+  const pool = (category ? words.filter(w => w.category === category) : words).filter(w => w.fante);
+  if (pool.length < 4) return res.status(404).json({ error: 'Not enough words in that category for a quiz' });
+  const questions = [];
+  for (let i = 0; i < n; i++) {
+    const answer = pool[Math.floor(Math.random() * pool.length)];
+    const distractors = new Set();
+    while (distractors.size < 3) {
+      const d = pool[Math.floor(Math.random() * pool.length)];
+      if (d.id !== answer.id) distractors.add(d.fante);
+    }
+    const choices = [answer.fante, ...distractors].sort(() => Math.random() - 0.5);
+    questions.push({
+      question: `What is "${answer.english}" in Fante?`,
+      english: answer.english,
+      choices,
+      answer: answer.fante,
+      category: answer.category,
+      audio_url: audioUrl(req, answer.sound),
+    });
+  }
+  res.json({ count: questions.length, questions });
+});
+
+// ── Chat ──────────────────────────────────────────────────────────────────────
 app.get('/api/chat', requireKey, (req, res) => {
-  const text = (req.query.message || '').toLowerCase().trim();
+  const text = String(req.query.message || '').toLowerCase().trim();
   const greetings = ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening'];
   if (greetings.some(g => text.includes(g))) {
     const w = words.find(x => x.category === 'greeting' && x.english.toLowerCase().includes('hello'))
@@ -147,15 +209,26 @@ app.get('/api/chat', requireKey, (req, res) => {
     audio_url: audioUrl(req, random.sound), word: random });
 });
 
-app.get('/api/random', requireKey, (req, res) => {
-  const { category } = req.query;
-  const pool = category ? words.filter(w => w.category === category) : words;
-  if (!pool.length) return res.status(404).json({ error: 'No words in that category' });
-  const w = pool[Math.floor(Math.random() * pool.length)];
-  res.json({ ...w, audio_url: audioUrl(req, w.sound) });
+// ── Static audio, health, errors ──────────────────────────────────────────────
+app.use('/audio', express.static(path.join(__dirname, 'audio'), { maxAge: '30d', immutable: true }));
+
+app.get('/api/health', (req, res) => res.json({ status: 'ok', words: words.length, version: VERSION }));
+
+app.use('/api', (req, res) => res.status(404).json({ error: `No such endpoint: ${req.method} ${req.path}` }));
+
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  console.error(err.stack || err.message);
+  if (err.type === 'entity.parse.failed') return res.status(400).json({ error: 'Invalid JSON body' });
+  res.status(500).json({ error: 'Internal server error' });
 });
 
-app.use('/audio', express.static(path.join(__dirname, 'audio')));
-app.get('/api/health', (req, res) => res.json({ status: 'ok', words: words.length, version: '1.0.0' }));
-
-app.listen(PORT, () => console.log(`Fante API → http://localhost:${PORT}`));
+// ── Start & graceful shutdown ─────────────────────────────────────────────────
+const server = app.listen(PORT, () => console.log(`Fante API v${VERSION} → http://localhost:${PORT}`));
+for (const sig of ['SIGTERM', 'SIGINT']) {
+  process.on(sig, () => {
+    console.log(`${sig} received, shutting down…`);
+    server.close(() => process.exit(0));
+    setTimeout(() => process.exit(1), 10000).unref();
+  });
+}
