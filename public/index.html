@@ -614,7 +614,15 @@ slides.forEach((_, i) => { const d = document.createElement('div'); d.className 
 function nextSlide() {
   clearTimeout(slideTimer);
   const prev = slideIdx;
-  slideIdx = (slideIdx + 1) % slides.length;
+  // pick next slide; skip video slides that haven't buffered enough yet
+  let n = slideIdx, tries = 0;
+  do {
+    n = (n + 1) % slides.length;
+    const cand = slides[n].querySelector('video');
+    if (!cand || cand.readyState >= 3) break;
+    tries++;
+  } while (tries < slides.length);
+  slideIdx = n;
   slides.forEach((s, i) => s.classList.toggle('on', i === slideIdx));
   document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('on', i === slideIdx));
   if (prev >= 0) { const pv = slides[prev].querySelector('video'); if (pv) pv.pause(); }
