@@ -72,6 +72,10 @@ const requireKey = asyncH(async (req, res, next) => {
   if (typeof key !== 'string' || key.length > 100) return res.status(403).json({ error: 'Invalid or revoked API key.' });
   const row = await rpc('fante_check_key', { p_key: key, p_endpoint: req.path, p_query: req.query });
   if (!row) return res.status(403).json({ error: 'Invalid or revoked API key.' });
+  if (row.quota_exceeded) return res.status(402).json({
+    error: 'Monthly quota reached.', ...row,
+    upgrade_url: `${baseUrl(req)}/#pricing`,
+  });
   req.apiKey = row;
   next();
 });
@@ -208,6 +212,64 @@ app.get('/api/chat', requireKey, (req, res) => {
   res.json({ reply: `Fante word: "${random.english}" = "${random.fante}"\nSay "how do you say [word]" to translate!`,
     audio_url: audioUrl(req, random.sound), word: random });
 });
+
+// ── Billing: plans, Paystack checkout (card / MTN MoMo / QR / USSD) ──────────
+const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET_KEY || '';
+const PAYMENT_SECRET = process.env.PAYMENT_SECRET || '';
+
+app.get('/api/plans', asyncH(async (req, res) => {
+  const plans = await rpc('fante_get_plans', {});
+  res.json({ currency: 'GHS', prepaid: { price_ghs: 10, calls: 1000, note: 'GH₵10 = 1,000 prepaid calls — never expire' },
+    learner_pass: { price_ghs: 15, note: 'GH₵15/month — unlimited listening on the website' }, plans });
+}));
+
+// Start a checkout. kind: 'credits' | 'basic' | 'standard' | 'enterprise' | 'learner'
+app.post('/api/pay/init', keygenLimiter, asyncH(async (req, res) => {
+  const { email, kind, amount_ghs, api_key } = req.body || {};
+  const KINDS = { credits: null, basic: 49, standard: 199, enterprise: 999, learner: 15 };
+  if (!email || !/.+@.+\..+/.test(String(email))) return res.status(400).json({ error: 'Valid email required' });
+  if (!(kind in KINDS)) return res.status(400).json({ error: 'Invalid kind' });
+  const amount = kind === 'credits' ? Number(amount_ghs) : KINDS[kind];
+  if (!amount || amount < 5 || amount > 100000) return res.status(400).json({ error: 'Invalid amount (min GH₵5)' });
+  if (!PAYSTACK_SECRET) return res.json({
+    setup_required: true,
+    message: 'Payments are launching soon! Email us to subscribe manually.',
+    contact: 'subscriptions@learnfanteapi.com',
+  });
+  const r = await fetch('https://api.paystack.co/transaction/initialize', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${PAYSTACK_SECRET}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      email, amount: Math.round(amount * 100), currency: 'GHS',
+      channels: ['card', 'mobile_money', 'qr', 'ussd', 'bank_transfer'],
+      callback_url: `${baseUrl(req)}/?pay=verify`,
+      metadata: { kind, api_key: api_key || '', custom_fields: [] },
+    }),
+    signal: AbortSignal.timeout(15000),
+  });
+  const data = await r.json();
+  if (!data.status) return res.status(502).json({ error: 'Payment init failed', detail: data.message });
+  res.json({ checkout_url: data.data.authorization_url, reference: data.data.reference });
+}));
+
+// Verify + apply after Paystack redirects back
+app.get('/api/pay/verify', asyncH(async (req, res) => {
+  const { reference } = req.query;
+  if (!reference) return res.status(400).json({ error: 'Missing reference' });
+  if (!PAYSTACK_SECRET) return res.status(503).json({ error: 'Payments not configured yet' });
+  const r = await fetch(`https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`, {
+    headers: { Authorization: `Bearer ${PAYSTACK_SECRET}` }, signal: AbortSignal.timeout(15000),
+  });
+  const data = await r.json();
+  if (!data.status || data.data.status !== 'success') return res.status(402).json({ error: 'Payment not completed', status: data.data && data.data.status });
+  const meta = data.data.metadata || {};
+  const out = await rpc('fante_apply_payment', {
+    p_secret: PAYMENT_SECRET, p_reference: String(reference),
+    p_key: meta.api_key || '', p_kind: meta.kind || 'credits',
+    p_amount_ghs: data.data.amount / 100,
+  });
+  res.json({ success: true, kind: meta.kind, ...out });
+}));
 
 // ── Static audio, health, errors ──────────────────────────────────────────────
 app.use('/audio', express.static(path.join(__dirname, 'audio'), { maxAge: '30d', immutable: true }));
