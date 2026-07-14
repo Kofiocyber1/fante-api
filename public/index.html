@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Learn Fante — Return to Your Roots 🇬🇭</title>
+  <title>Learn Fante API — Learn Fante Language 🇬🇭</title>
+  <link rel="icon" type="image/svg+xml" href="/logo.svg">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
@@ -63,13 +64,12 @@
       box-shadow: 0 1px 0 rgba(0,0,0,0.06);
     }
     .logo { display: flex; align-items: center; gap: 11px; font-weight: 900; font-size: 1.25rem; letter-spacing: -0.5px; cursor: pointer; }
-    .logo .sun {
-      width: 42px; height: 42px; border-radius: 50%; position: relative; flex-shrink: 0;
-      background: radial-gradient(circle at 50% 42%, #FFE977 0%, var(--gh-gold) 55%, var(--sunset, #F7931E) 100%);
-      display: flex; align-items: center; justify-content: center;
+    .logo img {
+      width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0;
       box-shadow: 0 3px 10px rgba(224,168,13,0.45);
+      transition: transform 0.4s;
     }
-    .logo .sun::after { content:'★'; color: var(--gh-black); font-size: 1.15rem; }
+    .logo:hover img { transform: rotate(-8deg) scale(1.08); }
     .logo .word { color: var(--ink); }
     .logo .word em { font-style: normal; color: var(--gh-red); }
     .logo .word small { display: block; font-size: 0.58rem; font-weight: 700; letter-spacing: 3.5px; color: var(--gh-green); text-transform: uppercase; }
@@ -517,8 +517,8 @@
 
 <header>
   <div class="logo" onclick="showView('browse')">
-    <span class="sun"></span>
-    <span class="word">Fante<em>API</em><small>Kasa Fante · Ghana</small></span>
+    <img src="/logo.svg" alt="Learn Fante API logo">
+    <span class="word">Learn Fante <em>API</em><small>Learn Fante Language</small></span>
   </div>
   <nav class="nav">
     <button class="nav-btn active" onclick="showView('browse')">Home</button>
