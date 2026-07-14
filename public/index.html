@@ -19,10 +19,21 @@
       --gh-black: #101010;
       --gh-blue: #2A6DB5;
       --paper: #FFFFFF;
+      --card: #FFFFFF;
+      --field: #FBF8EF;
       --ink: #17130C;
       --muted: #8A7430;
       --line: #EFE6CB;
       --shadow: 0 10px 30px rgba(6,46,31,0.10);
+    }
+    html[data-theme="dark"] {
+      --paper: #14130E;
+      --card: #201E15;
+      --field: #262316;
+      --ink: #F2EAD3;
+      --muted: #C9B36B;
+      --line: #3A351F;
+      --shadow: 0 10px 30px rgba(0,0,0,0.55);
     }
 
     html { scroll-behavior: smooth; }
@@ -65,13 +76,19 @@
     .nav { display: flex; gap: clamp(8px, 2.5vw, 34px); flex: 1; justify-content: flex-end; align-items: center; }
     .nav-btn {
       background: none; border: none; font-family: inherit; font-size: 0.98rem; font-weight: 600;
-      color: #333; cursor: pointer; padding: 8px 2px; letter-spacing: 0.3px;
+      color: var(--ink); opacity: 0.75; cursor: pointer; padding: 8px 2px; letter-spacing: 0.3px;
       border-bottom: 2.5px solid transparent; transition: all 0.2s;
     }
-    .nav-btn:hover { color: var(--gh-green); }
-    .nav-btn.active { color: var(--gh-black); border-bottom-color: var(--gh-gold); }
+    .nav-btn:hover { color: var(--gh-green); opacity: 1; }
+    .nav-btn.active { color: var(--ink); opacity: 1; border-bottom-color: var(--gh-gold); }
+    .theme-btn {
+      width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line);
+      background: var(--field); cursor: pointer; font-size: 1.05rem; line-height: 1;
+      transition: transform 0.3s; flex-shrink: 0;
+    }
+    .theme-btn:hover { transform: rotate(24deg) scale(1.08); }
     .key-chip {
-      font-size: 0.7rem; color: #777; background: #F6F1E3;
+      font-size: 0.7rem; color: #777; background: var(--field);
       padding: 6px 13px; border-radius: 999px; font-family: 'JetBrains Mono', monospace;
       cursor: pointer; border: 1px solid var(--line); transition: all 0.2s; white-space: nowrap;
     }
@@ -137,7 +154,7 @@
     .search-row { display: flex; gap: 12px; padding: 22px clamp(16px, 4vw, 48px) 6px; align-items: center; }
     .search-row input {
       flex: 1; padding: 13px 20px; border-radius: 999px;
-      border: 1.5px solid var(--line); background: #FBF8EF;
+      border: 1.5px solid var(--line); background: var(--field);
       color: var(--ink); font-size: 0.95rem; outline: none; font-family: inherit; transition: all 0.25s;
     }
     .search-row input:focus { border-color: var(--gh-gold-deep); box-shadow: 0 0 0 4px rgba(252,209,22,0.16); }
@@ -147,7 +164,7 @@
     .cat-bar::-webkit-scrollbar { display: none; }
     .cat-btn {
       padding: 7px 15px; border-radius: 999px; border: 1px solid var(--line);
-      background: #FBF8EF; color: #6B5D33; font-size: 0.78rem; font-weight: 600;
+      background: var(--field); color: var(--muted); font-size: 0.78rem; font-weight: 600;
       cursor: pointer; white-space: nowrap; transition: all 0.2s; font-family: inherit;
     }
     .cat-btn.active {
@@ -160,7 +177,7 @@
       gap: 14px; padding: 10px clamp(16px, 4vw, 48px) 50px; perspective: 1200px;
     }
     .word-card {
-      position: relative; background: #fff; border: 1px solid var(--line);
+      position: relative; background: var(--card); border: 1px solid var(--line);
       border-radius: 16px; padding: 14px 16px;
       display: flex; align-items: center; gap: 13px;
       cursor: pointer; transition: box-shadow 0.25s, border-color 0.25s;
@@ -221,7 +238,7 @@
     .quiz-play { padding: 10px 28px; border-radius: 999px; border: none; background: linear-gradient(135deg, var(--gh-gold), var(--gh-gold-deep)); color: var(--gh-black); font-weight: 800; font-size: 0.9rem; cursor: pointer; font-family: inherit; box-shadow: 0 4px 14px rgba(252,209,22,0.4); }
     .quiz-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; perspective: 900px; }
     .quiz-opt {
-      padding: 16px; border-radius: 14px; border: 2px solid var(--line); background: #fff;
+      padding: 16px; border-radius: 14px; border: 2px solid var(--line); background: var(--card);
       font-size: 0.95rem; font-weight: 700; color: var(--gh-green-deep); cursor: pointer;
       transition: all 0.2s; font-family: inherit; transform-style: preserve-3d;
     }
@@ -237,7 +254,7 @@
     /* ══ DEVELOPER ════════════════════════════════════════════ */
     .dev-wrap { max-width: 880px; margin: 0 auto; padding: 18px 24px 60px; }
     .section-card {
-      background: #fff; border: 1px solid var(--line); border-radius: 18px;
+      background: var(--card); border: 1px solid var(--line); border-radius: 18px;
       padding: 26px; margin-bottom: 22px; box-shadow: var(--shadow); position: relative; overflow: hidden;
     }
     .section-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
@@ -245,7 +262,7 @@
     .section-card h3 { font-size: 1.05rem; font-weight: 800; margin-bottom: 14px; }
     .keygen-form { display: flex; flex-direction: column; gap: 12px; }
     .keygen-row { display: flex; gap: 12px; }
-    .keygen-form input { flex: 1; padding: 11px 16px; border-radius: 12px; border: 1.5px solid var(--line); font-size: 0.92rem; background: #FBF8EF; outline: none; font-family: inherit; transition: all 0.2s; }
+    .keygen-form input { flex: 1; padding: 11px 16px; border-radius: 12px; border: 1.5px solid var(--line); font-size: 0.92rem; background: var(--field); color: var(--ink); outline: none; font-family: inherit; transition: all 0.2s; }
     .keygen-form input:focus { border-color: var(--gh-gold-deep); box-shadow: 0 0 0 4px rgba(252,209,22,0.16); }
     .keygen-btn { padding: 13px 28px; border-radius: 12px; border: none; background: linear-gradient(135deg, var(--gh-green), var(--gh-green-deep)); color: #fff; font-weight: 800; font-size: 0.95rem; cursor: pointer; font-family: inherit; box-shadow: 0 6px 16px rgba(0,107,63,0.25); transition: transform 0.15s; }
     .keygen-btn:hover { transform: translateY(-2px); }
@@ -285,6 +302,39 @@
     footer { background: var(--paper); padding: 26px 24px 44px; text-align: center; color: var(--muted); font-size: 0.8rem; }
     footer .motto { color: var(--gh-green); font-weight: 800; letter-spacing: 3px; font-size: 0.72rem; text-transform: uppercase; }
     footer .motto .r { color: var(--gh-red); } footer .motto .g { color: var(--gh-gold-deep); }
+
+    /* ══ Pricing table (reference style) ══════════════════════ */
+    .price-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    .price-table th { text-align: left; padding: 10px 12px; border-bottom: 2px solid var(--line); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); }
+    .price-table td { padding: 14px 12px; border-bottom: 1px solid var(--line); vertical-align: top; line-height: 1.5; }
+    .price-table td:first-child { color: var(--gh-blue); font-weight: 700; white-space: nowrap; }
+    .price-table tr:last-child td { border-bottom: none; }
+    .buy-btn {
+      padding: 8px 18px; border-radius: 999px; border: none; cursor: pointer; font-family: inherit;
+      background: linear-gradient(135deg, var(--gh-gold), var(--gh-gold-deep));
+      color: var(--gh-black); font-weight: 800; font-size: 0.8rem; white-space: nowrap;
+      box-shadow: 0 3px 10px rgba(224,168,13,0.3); transition: transform 0.15s;
+    }
+    .buy-btn:hover { transform: translateY(-2px); }
+    .buy-btn.free { background: var(--field); color: var(--muted); box-shadow: none; cursor: default; }
+
+    /* ══ Paywall modal ════════════════════════════════════════ */
+    .modal-wrap { position: fixed; inset: 0; z-index: 300; display: none; align-items: center; justify-content: center; background: rgba(8,10,8,0.62); padding: 18px; }
+    .modal-wrap.open { display: flex; }
+    .modal {
+      width: min(480px, 100%); background: var(--paper); border-radius: 22px; padding: 30px 26px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.5); position: relative; text-align: center;
+      animation: quizIn 0.4s cubic-bezier(0.2,0.8,0.3,1.1);
+    }
+    .modal::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; border-radius: 22px 22px 0 0;
+      background: linear-gradient(90deg, var(--gh-red) 0 33%, var(--gh-gold) 33% 66%, var(--gh-green) 66% 100%); }
+    .modal .close-x { position: absolute; right: 14px; top: 12px; border: none; background: none; font-size: 1.3rem; cursor: pointer; color: var(--muted); }
+    .modal h3 { font-family: 'Playfair Display', serif; font-size: 1.45rem; margin: 8px 0 6px; }
+    .modal p { font-size: 0.88rem; color: var(--muted); margin-bottom: 14px; }
+    .modal .pay-email { width: 100%; padding: 12px 16px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--field); color: var(--ink); font-family: inherit; font-size: 0.9rem; outline: none; margin-bottom: 12px; }
+    .modal .pay-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+    .pay-methods { display: flex; gap: 8px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
+    .pay-methods span { font-size: 0.66rem; font-weight: 800; letter-spacing: 0.5px; padding: 4px 10px; border-radius: 999px; background: var(--field); color: var(--muted); border: 1px solid var(--line); }
 
     /* ══ SVG scene animations ═════════════════════════════════ */
     .um-canopy { transform-origin: 800px 210px; animation: umRock 6s ease-in-out infinite; }
@@ -474,7 +524,9 @@
     <button class="nav-btn active" onclick="showView('browse')">Home</button>
     <button class="nav-btn" onclick="showView('quiz')">Quiz</button>
     <button class="nav-btn" onclick="showView('favs')">Favorites</button>
+    <button class="nav-btn" onclick="showView('pricing')">Pricing</button>
     <button class="nav-btn" onclick="showView('developer')">Developer</button>
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Light / dark mode">🌙</button>
     <div class="key-chip" id="keyChip" onclick="showView('developer')">No key</div>
   </nav>
 </header>
@@ -500,6 +552,7 @@
     </div>
     <div class="search-row">
       <input id="searchInput" type="text" placeholder="Search English or Fante..." oninput="filterWords()">
+      <span class="count-tag" id="playsTag" title="Free audio plays today" style="cursor:pointer" onclick="openPaywall()">🔊 10/10 free</span>
       <span class="count-tag" id="countTag">—</span>
     </div>
     <div class="cat-bar" id="catBar"></div>
@@ -528,6 +581,43 @@
       <span class="count-tag" id="favCount">—</span>
     </div>
     <div class="word-grid" id="favGrid"></div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<div class="view" id="view-pricing">
+  <div class="bg-window" style="height:22vh"><span>Simple, fair pricing 🇬🇭</span></div>
+  <div class="sheet">
+    <div class="sheet-head">
+      <h2>Products &amp; <span class="g">Pricing</span></h2>
+      <p>Affordable for Ghana &amp; the diaspora — pay with Visa, Mastercard, MTN Mobile Money, AirtelTigo, Telecel Cash, QR or bank transfer</p>
+    </div>
+    <div class="dev-wrap">
+      <div class="section-card">
+        <h3>🎧 For Learners</h3>
+        <table class="price-table">
+          <tr><th>Name</th><th>Description</th><th></th></tr>
+          <tr><td><b>Free Daily</b></td><td>10 free audio plays every day — resets at midnight. Browse, search and quiz for free, forever.</td><td></td></tr>
+          <tr><td><b>Learner Pass</b></td><td>GH₵15 per month — unlimited listening on the website. Support the preservation of Fante!</td>
+            <td><button class="buy-btn" onclick="buy('learner')">Get Pass · GH₵15</button></td></tr>
+        </table>
+      </div>
+      <div class="section-card">
+        <h3>🔑 For Developers — API plans</h3>
+        <table class="price-table" id="planTable"><tr><td>Loading plans…</td></tr></table>
+        <div style="margin-top:14px; padding:14px; border-radius:12px; background:var(--field); font-size:0.85rem;">
+          <b>⚡ Prepaid credits (pay-as-you-go):</b> GH₵10 = 1,000 API calls, never expire, used automatically when your monthly quota runs out.
+          <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+            <button class="buy-btn" onclick="buy('credits',10)">GH₵10 · 1,000 calls</button>
+            <button class="buy-btn" onclick="buy('credits',50)">GH₵50 · 5,000 calls</button>
+            <button class="buy-btn" onclick="buy('credits',100)">GH₵100 · 10,000 calls</button>
+          </div>
+        </div>
+      </div>
+      <p style="text-align:center;font-size:0.85rem;color:var(--muted);font-style:italic;">
+        For any issues with subscribing to the products listed above, please email <b>subscriptions@learnfanteapi.com</b>
+      </p>
+    </div>
   </div>
 </div>
 
@@ -598,6 +688,26 @@
   <div style="margin-top:8px">FanteAPI — preserving and sharing the Fante language of Ghana 🇬🇭</div>
 </footer>
 
+<!-- PAYWALL / CHECKOUT MODAL -->
+<div class="modal-wrap" id="payModal">
+  <div class="modal">
+    <button class="close-x" onclick="closePaywall()">✕</button>
+    <div style="font-size:2.2rem">🔊✨</div>
+    <h3 id="payTitle">You've used your 10 free plays today!</h3>
+    <p id="payDesc">Come back tomorrow for 10 more — or go unlimited and support the preservation of Fante. Cancel anytime.</p>
+    <input class="pay-email" id="payEmail" type="email" placeholder="Your email for the receipt">
+    <div class="pay-row">
+      <button class="buy-btn" style="padding:12px 24px;font-size:0.9rem" onclick="buy('learner')">Unlimited Listening · GH₵15/mo</button>
+    </div>
+    <div class="pay-row" style="margin-top:10px">
+      <button class="btn-ghost" style="color:var(--muted);border-color:var(--line);font-size:0.8rem;padding:9px 20px" onclick="closePaywall()">Maybe tomorrow</button>
+    </div>
+    <div class="pay-methods">
+      <span>VISA</span><span>MASTERCARD</span><span>MTN MoMo</span><span>AT MONEY</span><span>TELECEL CASH</span><span>QR</span><span>USSD</span>
+    </div>
+  </div>
+</div>
+
 </div><!-- /page -->
 
 <script>
@@ -606,6 +716,119 @@ let currentAudio = null, playingId = null;
 let favorites = JSON.parse(localStorage.getItem('fanteFavs') || '[]');
 let apiKey = localStorage.getItem('fanteApiKey') || '';
 let quizState = {};
+
+/* ══ THEME (light / dark) ═══════════════════════════════════ */
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  localStorage.setItem('fanteTheme', t);
+  const b = document.getElementById('themeBtn');
+  if (b) b.textContent = t === 'dark' ? '☀️' : '🌙';
+}
+function toggleTheme() {
+  applyTheme((localStorage.getItem('fanteTheme') || 'light') === 'dark' ? 'light' : 'dark');
+}
+applyTheme(localStorage.getItem('fanteTheme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+
+/* ══ DAILY FREE-PLAY GATE (10/day, resets at midnight) ═════ */
+const FREE_PLAYS = 10;
+function today() { return new Date().toISOString().slice(0, 10); }
+function passActive() {
+  const exp = localStorage.getItem('fantePassUntil');
+  return exp && new Date(exp) > new Date();
+}
+function playsToday() {
+  const o = JSON.parse(localStorage.getItem('fantePlays') || '{}');
+  return o.date === today() ? (o.n || 0) : 0;
+}
+function registerPlay() {
+  if (passActive()) return true;
+  let n = playsToday();
+  if (n >= FREE_PLAYS) return false;
+  localStorage.setItem('fantePlays', JSON.stringify({ date: today(), n: n + 1 }));
+  updatePlaysTag();
+  return true;
+}
+function updatePlaysTag() {
+  const el = document.getElementById('playsTag');
+  if (!el) return;
+  if (passActive()) { el.textContent = '🔊 Unlimited ✓'; el.style.color = 'var(--gh-green)'; }
+  else el.textContent = `🔊 ${Math.max(FREE_PLAYS - playsToday(), 0)}/${FREE_PLAYS} free`;
+}
+function openPaywall() {
+  if (passActive()) return;
+  document.getElementById('payModal').classList.add('open');
+}
+function closePaywall() { document.getElementById('payModal').classList.remove('open'); }
+
+/* ══ CHECKOUT (Paystack: Visa / MTN MoMo OTP / QR / USSD) ══ */
+async function buy(kind, amount) {
+  let email = (document.getElementById('payEmail') || {}).value || localStorage.getItem('fanteEmail') || '';
+  email = email.trim();
+  if (!/.+@.+\..+/.test(email)) {
+    email = prompt('Enter your email for the receipt:') || '';
+    if (!/.+@.+\..+/.test(email.trim())) return alert('A valid email is needed to pay.');
+  }
+  localStorage.setItem('fanteEmail', email.trim());
+  if ((kind === 'credits' || ['basic','standard','enterprise'].includes(kind)) && !apiKey) {
+    alert('Generate your free API key first (Developer tab) so we know which account to credit!');
+    showView('developer'); return;
+  }
+  const r = await fetch('/api/pay/init', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email.trim(), kind, amount_ghs: amount, api_key: apiKey }),
+  });
+  const data = await r.json();
+  if (data.setup_required) {
+    alert('🚀 ' + data.message + '\n\n📧 ' + data.contact);
+    return;
+  }
+  if (data.checkout_url) {
+    localStorage.setItem('fantePendingKind', kind);
+    location.href = data.checkout_url; // Paystack hosted page: card, MoMo OTP, QR, USSD
+  } else alert('Payment error: ' + (data.error || 'unknown'));
+}
+
+/* verify payment after redirect back */
+async function checkPaymentReturn() {
+  const params = new URLSearchParams(location.search);
+  const ref = params.get('reference') || params.get('trxref');
+  if (!ref) return;
+  history.replaceState({}, '', '/');
+  try {
+    const r = await fetch('/api/pay/verify?reference=' + encodeURIComponent(ref));
+    const data = await r.json();
+    if (data.success) {
+      if (data.kind === 'learner') {
+        const until = new Date(); until.setDate(until.getDate() + 30);
+        localStorage.setItem('fantePassUntil', until.toISOString());
+        updatePlaysTag();
+        alert('🎉 Medaase! Unlimited listening unlocked for 30 days.');
+      } else {
+        alert('🎉 Payment received! Your API key has been upgraded/credited.');
+      }
+    } else alert('Payment could not be verified: ' + (data.error || ''));
+  } catch (e) { /* ignore */ }
+}
+
+/* pricing table */
+async function loadPlans() {
+  try {
+    const r = await fetch('/api/plans');
+    const data = await r.json();
+    const rows = (data.plans || []).map(p => `
+      <tr>
+        <td>${p.name}</td>
+        <td>${p.description}</td>
+        <td>${p.price_ghs > 0
+          ? `<button class="buy-btn" onclick="buy('${p.id}')">Subscribe · GH₵${p.price_ghs}/mo</button>`
+          : '<button class="buy-btn free">Free ✓</button>'}</td>
+      </tr>`).join('');
+    document.getElementById('planTable').innerHTML =
+      '<tr><th>Name</th><th>Description</th><th></th></tr>' + rows;
+  } catch (e) {
+    document.getElementById('planTable').innerHTML = '<tr><td>Could not load plans.</td></tr>';
+  }
+}
 
 /* ══ BACKGROUND SLIDESHOW ═══════════════════════════════════ */
 const slides = [...document.querySelectorAll('#bgShow .slide')];
@@ -729,10 +952,12 @@ async function init() {
     bar.appendChild(b);
   });
   updateKeyChip();
+  updatePlaysTag();
   filterWords();
   buildDocs();
   buildIntegrations();
   initTilt();
+  checkPaymentReturn();
 }
 
 function initTilt() {
@@ -754,10 +979,11 @@ function showView(name) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('view-' + name).classList.add('active');
-  const idx = ['browse','quiz','favs','developer'].indexOf(name);
+  const idx = ['browse','quiz','favs','pricing','developer'].indexOf(name);
   if (idx >= 0) document.querySelectorAll('.nav-btn')[idx].classList.add('active');
   if (name === 'quiz') startQuiz();
   if (name === 'favs') renderFavs('');
+  if (name === 'pricing') loadPlans();
   window.scrollTo({ top: 0 });
 }
 
@@ -821,6 +1047,7 @@ function showMore(gridId) {
 function playWord(id) {
   const w = allWords.find(x => x.id===id);
   if (!w) return;
+  if (!registerPlay()) { openPaywall(); return; }
   if (currentAudio) currentAudio.pause();
   if (playingId) {
     const old = document.getElementById('wc-'+playingId);
