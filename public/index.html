@@ -3,225 +3,179 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Learn Fante — API Platform 🇬🇭</title>
+  <title>Learn Fante — Return to Your Roots 🇬🇭</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800;900&family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      /* Ghana flag + coat of arms palette */
       --gh-red: #CE1126;
       --gh-gold: #FCD116;
       --gh-gold-deep: #E0A80D;
       --gh-green: #006B3F;
       --gh-green-deep: #043823;
-      --gh-green-dark: #062E1F;
-      --gh-black: #0B0B0B;
-      --gh-blue: #2A6DB5;        /* shield blue */
-      --gh-sky: #1B2E6B;         /* night-sky blue from scene */
-      --sunset-1: #F7931E;       /* sunset orange */
-      --sunset-2: #F15A29;
-      --bg: #FBF6E9;             /* warm sand */
-      --card: #FFFFFF;
-      --border: #EAD9A8;
-      --text: #16130A;
+      --gh-black: #101010;
+      --gh-blue: #2A6DB5;
+      --paper: #FFFFFF;
+      --ink: #17130C;
       --muted: #8A7430;
+      --line: #EFE6CB;
       --shadow: 0 10px 30px rgba(6,46,31,0.10);
     }
 
     html { scroll-behavior: smooth; }
-    body {
-      font-family: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-      background:
-        radial-gradient(1200px 500px at 85% -10%, rgba(252,209,22,0.14), transparent 60%),
-        radial-gradient(900px 400px at -10% 20%, rgba(0,107,63,0.10), transparent 55%),
-        var(--bg);
-      color: var(--text); min-height: 100vh;
-    }
+    body { font-family: 'Outfit', -apple-system, sans-serif; color: var(--ink); background: #000; min-height: 100vh; }
 
-    /* ── Kente stripe ─────────────────────────────────────────── */
-    .kente {
-      height: 6px; width: 100%;
-      background: repeating-linear-gradient(90deg,
-        var(--gh-red) 0 48px, var(--gh-gold) 48px 96px,
-        var(--gh-green) 96px 144px, var(--gh-black) 144px 156px);
-      background-size: 200% 100%;
-      animation: kenteSlide 24s linear infinite;
+    /* ══ FIXED BACKGROUND SLIDESHOW ═══════════════════════════ */
+    .bg-show { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: #0A1F3A; }
+    .slide {
+      position: absolute; inset: 0; opacity: 0; transition: opacity 1.4s ease;
+      display: flex; align-items: center; justify-content: center;
     }
-    @keyframes kenteSlide { to { background-position: -200% 0; } }
+    .slide.on { opacity: 1; }
+    .slide video, .slide svg { width: 100%; height: 100%; object-fit: cover; }
+    .bg-veil { position: fixed; inset: 0; z-index: 1; pointer-events: none;
+      background: linear-gradient(to bottom, rgba(10,16,30,0.25), rgba(10,16,30,0.05) 30%, rgba(10,16,30,0.25) 90%); }
 
-    /* ── Header ───────────────────────────────────────────────── */
+    /* ══ CONTENT LAYER ════════════════════════════════════════ */
+    .page { position: relative; z-index: 2; }
+
+    /* White minimal header (Sankofa style) */
     header {
-      background: linear-gradient(120deg, var(--gh-green-dark) 0%, var(--gh-green-deep) 55%, #0A2E4F 100%);
-      padding: 0 24px; display: flex; align-items: center; gap: 20px;
-      position: sticky; top: 0; z-index: 200;
-      box-shadow: 0 4px 24px rgba(4,40,25,0.45); height: 62px;
+      background: var(--paper); height: 76px;
+      display: flex; align-items: center; gap: 20px; padding: 0 clamp(16px, 4vw, 48px);
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 1px 0 rgba(0,0,0,0.06);
     }
-    .logo { display: flex; align-items: center; gap: 10px; font-size: 1.3rem; font-weight: 900; color: var(--gh-gold); letter-spacing: -0.5px; }
-    .logo .star {
-      display: inline-flex; align-items: center; justify-content: center;
-      width: 34px; height: 34px; border-radius: 50%;
-      background: radial-gradient(circle at 35% 30%, #FFE977, var(--gh-gold) 55%, var(--gh-gold-deep));
-      color: var(--gh-black); font-size: 1.15rem;
-      box-shadow: 0 0 0 2px rgba(252,209,22,0.25), 0 4px 12px rgba(0,0,0,0.4);
-      animation: starSpin 9s linear infinite;
-      transform-style: preserve-3d;
+    .logo { display: flex; align-items: center; gap: 11px; font-weight: 900; font-size: 1.25rem; letter-spacing: -0.5px; cursor: pointer; }
+    .logo .sun {
+      width: 42px; height: 42px; border-radius: 50%; position: relative; flex-shrink: 0;
+      background: radial-gradient(circle at 50% 42%, #FFE977 0%, var(--gh-gold) 55%, var(--sunset, #F7931E) 100%);
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 3px 10px rgba(224,168,13,0.45);
     }
-    @keyframes starSpin { 0%{transform:rotateY(0)} 50%{transform:rotateY(180deg)} 100%{transform:rotateY(360deg)} }
-    .logo span { color: #fff; font-weight: 300; }
-    .nav { display: flex; gap: 4px; flex: 1; }
+    .logo .sun::after { content:'★'; color: var(--gh-black); font-size: 1.15rem; }
+    .logo .word { color: var(--ink); }
+    .logo .word em { font-style: normal; color: var(--gh-red); }
+    .logo .word small { display: block; font-size: 0.58rem; font-weight: 700; letter-spacing: 3.5px; color: var(--gh-green); text-transform: uppercase; }
+    .nav { display: flex; gap: clamp(8px, 2.5vw, 34px); flex: 1; justify-content: flex-end; align-items: center; }
     .nav-btn {
-      padding: 7px 16px; border-radius: 999px; border: 1px solid transparent;
-      background: transparent; color: #B9CDB9; font-size: 0.86rem;
-      cursor: pointer; transition: all 0.2s; font-weight: 600; font-family: inherit;
+      background: none; border: none; font-family: inherit; font-size: 0.98rem; font-weight: 600;
+      color: #333; cursor: pointer; padding: 8px 2px; letter-spacing: 0.3px;
+      border-bottom: 2.5px solid transparent; transition: all 0.2s;
     }
-    .nav-btn:hover { color: var(--gh-gold); border-color: rgba(252,209,22,0.4); }
-    .nav-btn.active {
-      background: linear-gradient(135deg, var(--gh-gold), var(--gh-gold-deep));
-      color: var(--gh-black); box-shadow: 0 3px 10px rgba(252,209,22,0.35);
-    }
+    .nav-btn:hover { color: var(--gh-green); }
+    .nav-btn.active { color: var(--gh-black); border-bottom-color: var(--gh-gold); }
     .key-chip {
-      font-size: 0.72rem; color: #9DB79D; background: rgba(0,0,0,0.35);
-      padding: 5px 12px; border-radius: 999px; font-family: 'JetBrains Mono', monospace;
-      cursor: pointer; border: 1px solid rgba(252,209,22,0.2); transition: all 0.2s; white-space: nowrap;
+      font-size: 0.7rem; color: #777; background: #F6F1E3;
+      padding: 6px 13px; border-radius: 999px; font-family: 'JetBrains Mono', monospace;
+      cursor: pointer; border: 1px solid var(--line); transition: all 0.2s; white-space: nowrap;
     }
-    .key-chip:hover { border-color: var(--gh-gold); color: var(--gh-gold); }
-    .key-chip.has-key { color: #7CE3A2; border-color: rgba(0,170,90,0.6); }
+    .key-chip:hover { border-color: var(--gh-gold-deep); color: var(--gh-gold-deep); }
+    .key-chip.has-key { color: var(--gh-green); border-color: #BFE3CF; background: #EDFAF3; }
 
     .view { display: none; }
-    .view.active { display: block; animation: viewIn 0.35s ease; }
-    @keyframes viewIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .view.active { display: block; }
 
-    /* ── Hero (sunset scene from reference) ───────────────────── */
-    .hero {
-      position: relative; overflow: hidden;
-      background:
-        linear-gradient(to bottom,
-          var(--gh-sky) 0%, #27408F 26%,
-          var(--sunset-2) 40%, var(--sunset-1) 50%,
-          #0A5C38 62%, var(--gh-green) 74%,
-          var(--gh-gold) 74.5%, #F5CB2F 100%);
-      padding: 44px 24px 30px; text-align: center; color: #fff;
-      perspective: 800px;
+    /* ══ HERO (transparent — slideshow visible) ═══════════════ */
+    .hero { min-height: 78vh; display: flex; align-items: center; padding: 0 clamp(20px, 7vw, 110px); }
+    .hero-copy { max-width: 640px; color: #fff; animation: rise 0.9s ease both; }
+    @keyframes rise { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
+    .hero-copy h1 {
+      font-family: 'Playfair Display', serif; font-weight: 800;
+      font-size: clamp(2.1rem, 5.4vw, 3.9rem); line-height: 1.12; letter-spacing: -0.5px;
+      text-shadow: 0 4px 28px rgba(0,0,0,0.55);
     }
-    .hero::before { /* sun */
-      content: ''; position: absolute; left: 50%; top: 42%;
-      width: 210px; height: 210px; transform: translateX(-50%);
-      border-radius: 50%;
-      background: radial-gradient(circle, #FFE977 0%, var(--gh-gold) 45%, rgba(252,209,22,0) 72%);
-      opacity: 0.9; animation: sunPulse 6s ease-in-out infinite;
+    .hero-copy h1 .gold { color: var(--gh-gold); }
+    .hero-copy p { margin-top: 14px; font-size: clamp(0.95rem, 1.6vw, 1.15rem); font-weight: 400; color: rgba(255,255,255,0.94); text-shadow: 0 2px 14px rgba(0,0,0,0.6); }
+    .hero-cta { margin-top: 26px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn-gold {
+      padding: 13px 30px; border-radius: 999px; border: none; cursor: pointer; font-family: inherit;
+      background: linear-gradient(135deg, var(--gh-gold), var(--gh-gold-deep));
+      color: var(--gh-black); font-weight: 800; font-size: 0.95rem;
+      box-shadow: 0 8px 24px rgba(252,209,22,0.4); transition: transform 0.15s;
     }
-    @keyframes sunPulse { 0%,100%{transform:translateX(-50%) scale(1)} 50%{transform:translateX(-50%) scale(1.08)} }
-    .hero-inner { position: relative; z-index: 2; }
-    .hero h1 {
-      font-size: clamp(1.7rem, 4.5vw, 2.7rem); font-weight: 900; letter-spacing: -1px;
-      text-shadow: 0 3px 18px rgba(0,0,0,0.5);
+    .btn-gold:hover { transform: translateY(-2px); }
+    .btn-ghost {
+      padding: 13px 30px; border-radius: 999px; cursor: pointer; font-family: inherit;
+      background: rgba(255,255,255,0.12); backdrop-filter: blur(8px);
+      border: 1.5px solid rgba(255,255,255,0.55); color: #fff; font-weight: 700; font-size: 0.95rem;
+      transition: all 0.2s;
     }
-    .hero h1 .gold { color: var(--gh-gold); }
-    .hero p { margin-top: 8px; font-size: 0.95rem; color: rgba(255,255,255,0.92); text-shadow: 0 2px 8px rgba(0,0,0,0.45); font-weight: 400; }
-    .hero-badges { display: flex; gap: 10px; justify-content: center; margin-top: 14px; flex-wrap: wrap; }
-    .hero-badge {
-      background: rgba(0,0,0,0.35); backdrop-filter: blur(6px);
-      border: 1px solid rgba(252,209,22,0.35); color: var(--gh-gold);
-      padding: 5px 14px; border-radius: 999px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.4px;
+    .btn-ghost:hover { background: rgba(255,255,255,0.25); }
+    .slide-dots { position: absolute; right: clamp(16px, 4vw, 48px); bottom: 26px; display: flex; gap: 8px; z-index: 3; }
+    .dot { width: 9px; height: 9px; border-radius: 50%; background: rgba(255,255,255,0.4); transition: all 0.3s; }
+    .dot.on { background: var(--gh-gold); transform: scale(1.35); }
+
+    /* ══ WHITE SHEETS ═════════════════════════════════════════ */
+    .sheet {
+      background: var(--paper); border-radius: 26px 26px 0 0; position: relative;
+      box-shadow: 0 -14px 40px rgba(0,0,0,0.25);
     }
-    /* 3D floating scene actors */
-    .actor { position: absolute; z-index: 1; transform-style: preserve-3d; filter: drop-shadow(0 12px 10px rgba(0,0,0,0.35)); user-select: none; pointer-events: none; }
-    .actor.elephant { font-size: 4.2rem; left: 8%; bottom: 6%; animation: walk3d 11s ease-in-out infinite; }
-    .actor.palm { font-size: 3.6rem; right: 10%; bottom: 10%; animation: sway3d 7s ease-in-out infinite; transform-origin: bottom center; }
-    .actor.bird { font-size: 1.6rem; left: 22%; top: 16%; animation: fly3d 16s linear infinite; }
-    .actor.star3d {
-      font-size: 2.2rem; right: 20%; top: 12%; color: var(--gh-black);
-      animation: star3d 8s linear infinite;
+    .sheet::before { /* kente thread */
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 5px; border-radius: 26px 26px 0 0;
+      background: linear-gradient(90deg, var(--gh-red) 0 33%, var(--gh-gold) 33% 66%, var(--gh-green) 66% 100%);
     }
-    @keyframes walk3d {
-      0%,100% { transform: translateX(0) rotateY(0deg) translateZ(0); }
-      25% { transform: translateX(26px) rotateY(-12deg) translateZ(30px); }
-      50% { transform: translateX(52px) rotateY(0deg); }
-      75% { transform: translateX(26px) rotateY(12deg) translateZ(-20px); }
-    }
-    @keyframes sway3d {
-      0%,100% { transform: rotateZ(-4deg) rotateY(0deg); }
-      50% { transform: rotateZ(5deg) rotateY(28deg); }
-    }
-    @keyframes fly3d {
-      0% { transform: translateX(0) translateY(0) rotateY(0); }
-      45% { transform: translateX(46vw) translateY(-16px) rotateY(0); }
-      50% { transform: translateX(46vw) translateY(-16px) rotateY(180deg); }
-      95% { transform: translateX(0) translateY(4px) rotateY(180deg); }
-      100% { transform: translateX(0) translateY(0) rotateY(360deg); }
-    }
-    @keyframes star3d {
-      0% { transform: rotateY(0) rotateX(8deg); } 100% { transform: rotateY(360deg) rotateX(8deg); }
+    .sheet-head { text-align: center; padding: 44px 24px 6px; }
+    .sheet-head h2 { font-family: 'Playfair Display', serif; font-size: clamp(1.5rem, 3vw, 2.1rem); font-weight: 800; letter-spacing: -0.4px; }
+    .sheet-head h2 .g { color: var(--gh-green); }
+    .sheet-head p { color: var(--muted); font-size: 0.9rem; margin-top: 6px; }
+
+    /* transparent window band — slideshow shows through while scrolling */
+    .bg-window { height: 34vh; display: flex; align-items: center; justify-content: center; }
+    .bg-window span {
+      font-family: 'Playfair Display', serif; font-style: italic; color: #fff;
+      font-size: clamp(1.2rem, 3vw, 2rem); text-shadow: 0 3px 22px rgba(0,0,0,0.65);
+      background: rgba(0,0,0,0.22); padding: 10px 28px; border-radius: 999px; backdrop-filter: blur(4px);
     }
 
-    /* ── Search & categories ──────────────────────────────────── */
-    .search-row {
-      display: flex; gap: 12px; padding: 16px 24px;
-      background: linear-gradient(180deg, var(--gh-green-dark), var(--gh-green-deep));
-      align-items: center;
-    }
+    /* ══ SEARCH / CATEGORIES / GRID ═══════════════════════════ */
+    .search-row { display: flex; gap: 12px; padding: 22px clamp(16px, 4vw, 48px) 6px; align-items: center; }
     .search-row input {
-      flex: 1; padding: 11px 18px; border-radius: 999px;
-      border: 1.5px solid rgba(252,209,22,0.25); background: rgba(0,0,0,0.3);
-      color: #fff; font-size: 0.94rem; outline: none; font-family: inherit; transition: all 0.25s;
+      flex: 1; padding: 13px 20px; border-radius: 999px;
+      border: 1.5px solid var(--line); background: #FBF8EF;
+      color: var(--ink); font-size: 0.95rem; outline: none; font-family: inherit; transition: all 0.25s;
     }
-    .search-row input:focus { border-color: var(--gh-gold); box-shadow: 0 0 0 4px rgba(252,209,22,0.15); }
-    .search-row input::placeholder { color: #7E947E; }
-    .count-tag { font-size: 0.78rem; color: var(--gh-gold); white-space: nowrap; font-weight: 700; }
+    .search-row input:focus { border-color: var(--gh-gold-deep); box-shadow: 0 0 0 4px rgba(252,209,22,0.16); }
+    .count-tag { font-size: 0.78rem; color: var(--gh-green); white-space: nowrap; font-weight: 800; }
 
-    .cat-bar {
-      display: flex; gap: 8px; padding: 12px 24px;
-      overflow-x: auto; background: var(--gh-green-deep);
-      border-bottom: 3px solid var(--gh-gold); scrollbar-width: none;
-    }
+    .cat-bar { display: flex; gap: 8px; padding: 14px clamp(16px, 4vw, 48px); overflow-x: auto; scrollbar-width: none; }
     .cat-bar::-webkit-scrollbar { display: none; }
     .cat-btn {
-      padding: 6px 14px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.14);
-      background: rgba(0,0,0,0.25); color: #A9C3A9; font-size: 0.78rem; font-weight: 600;
+      padding: 7px 15px; border-radius: 999px; border: 1px solid var(--line);
+      background: #FBF8EF; color: #6B5D33; font-size: 0.78rem; font-weight: 600;
       cursor: pointer; white-space: nowrap; transition: all 0.2s; font-family: inherit;
     }
     .cat-btn.active {
-      background: linear-gradient(135deg, var(--gh-gold), var(--gh-gold-deep));
-      color: var(--gh-black); border-color: var(--gh-gold); font-weight: 800;
-      box-shadow: 0 3px 12px rgba(252,209,22,0.4);
+      background: var(--gh-black); color: var(--gh-gold); border-color: var(--gh-black); font-weight: 800;
     }
-    .cat-btn:hover:not(.active) { border-color: var(--gh-gold); color: var(--gh-gold); transform: translateY(-1px); }
+    .cat-btn:hover:not(.active) { border-color: var(--gh-gold-deep); color: var(--gh-gold-deep); transform: translateY(-1px); }
 
-    /* ── Word cards (3D) ──────────────────────────────────────── */
     .word-grid {
       display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 14px; padding: 20px 24px; perspective: 1200px;
+      gap: 14px; padding: 10px clamp(16px, 4vw, 48px) 50px; perspective: 1200px;
     }
     .word-card {
-      position: relative;
-      background: var(--card);
-      border: 1px solid var(--border);
+      position: relative; background: #fff; border: 1px solid var(--line);
       border-radius: 16px; padding: 14px 16px;
       display: flex; align-items: center; gap: 13px;
       cursor: pointer; transition: box-shadow 0.25s, border-color 0.25s;
       transform-style: preserve-3d; will-change: transform;
-      box-shadow: 0 2px 10px rgba(6,46,31,0.06);
-      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(6,46,31,0.05); overflow: hidden;
     }
-    .word-card::before { /* kente edge */
+    .word-card::before {
       content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 5px;
       background: linear-gradient(180deg, var(--gh-red) 0 33%, var(--gh-gold) 33% 66%, var(--gh-green) 66% 100%);
     }
     .word-card:hover { border-color: var(--gh-gold); box-shadow: var(--shadow); }
-    .word-card.playing {
-      border-color: var(--gh-gold);
-      background: linear-gradient(135deg, #FFFDF2, #FFF6D6);
-      box-shadow: 0 8px 28px rgba(252,209,22,0.35);
-    }
+    .word-card.playing { border-color: var(--gh-gold); background: linear-gradient(135deg, #FFFDF2, #FFF6D6); box-shadow: 0 8px 28px rgba(252,209,22,0.35); }
     .play-orb {
       width: 48px; height: 48px; border-radius: 50%; flex-shrink: 0;
       background: radial-gradient(circle at 32% 28%, #FFE977, var(--gh-gold) 52%, var(--gh-gold-deep));
       display: flex; align-items: center; justify-content: center;
-      font-size: 1.5rem; transition: transform 0.2s;
-      box-shadow: inset 0 -3px 6px rgba(0,0,0,0.18), 0 3px 8px rgba(224,168,13,0.35);
+      font-size: 1.5rem; box-shadow: inset 0 -3px 6px rgba(0,0,0,0.16), 0 3px 8px rgba(224,168,13,0.3);
       transform-style: preserve-3d;
     }
     .word-card:hover .play-orb { animation: orbHover 1.6s ease-in-out infinite; }
@@ -229,183 +183,131 @@
       background: radial-gradient(circle at 32% 28%, #3FBF7F, var(--gh-green) 60%, var(--gh-green-deep));
       animation: orbDance 0.9s ease-in-out infinite;
     }
-    @keyframes orbHover {
-      0%,100% { transform: rotateY(0deg) translateZ(0); }
-      50% { transform: rotateY(24deg) translateZ(14px) scale(1.07); }
-    }
+    @keyframes orbHover { 0%,100% { transform: rotateY(0) translateZ(0); } 50% { transform: rotateY(24deg) translateZ(14px) scale(1.07); } }
     @keyframes orbDance {
       0%,100% { transform: rotateY(0) rotateZ(-6deg) scale(1.05); }
-      25% { transform: rotateY(90deg) rotateZ(0deg) scale(1.14); }
-      50% { transform: rotateY(180deg) rotateZ(6deg) scale(1.05); }
-      75% { transform: rotateY(270deg) rotateZ(0deg) scale(1.14); }
+      25% { transform: rotateY(90deg) scale(1.14); } 50% { transform: rotateY(180deg) rotateZ(6deg) scale(1.05); }
+      75% { transform: rotateY(270deg) scale(1.14); }
     }
     .wc-body { flex: 1; min-width: 0; transform: translateZ(18px); }
-    .wc-en { font-weight: 700; font-size: 0.95rem; color: var(--text); }
+    .wc-en { font-weight: 700; font-size: 0.95rem; }
     .wc-ft { font-size: 0.92rem; color: var(--gh-green); font-weight: 700; font-style: italic; margin-top: 2px; }
-    .wc-cat { font-size: 0.68rem; color: #B8A66A; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+    .wc-cat { font-size: 0.66rem; color: #C0B080; margin-top: 4px; text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
     .fav-star { background: none; border: none; font-size: 1.1rem; cursor: pointer; opacity: 0.25; transition: all 0.2s; color: var(--gh-gold-deep); transform: translateZ(24px); }
     .fav-star:hover { transform: translateZ(24px) scale(1.3) rotate(18deg); opacity: 0.8; }
     .fav-star.on { opacity: 1; text-shadow: 0 0 12px rgba(252,209,22,0.8); }
-
     .empty { text-align: center; padding: 60px 24px; color: var(--muted); grid-column: 1/-1; }
     .empty .big { font-size: 2.8rem; margin-bottom: 10px; }
 
-    /* ── Quiz ─────────────────────────────────────────────────── */
-    .quiz-wrap { max-width: 560px; margin: 32px auto; padding: 0 24px; perspective: 1100px; }
-    .quiz-prog { font-size: 0.82rem; color: var(--muted); margin-bottom: 16px; text-align: center; font-weight: 700; letter-spacing: 0.5px; }
+    /* ══ QUIZ ═════════════════════════════════════════════════ */
+    .quiz-wrap { max-width: 560px; margin: 0 auto; padding: 26px 24px 60px; perspective: 1100px; }
+    .quiz-prog { font-size: 0.82rem; color: var(--muted); margin-bottom: 16px; text-align: center; font-weight: 700; }
     .quiz-card-q {
-      position: relative;
-      background: linear-gradient(150deg, var(--gh-green-dark), var(--gh-green-deep) 60%, #0A2E4F);
-      border: 2px solid rgba(252,209,22,0.4);
-      border-radius: 22px; padding: 40px 28px 32px; text-align: center;
-      margin-bottom: 20px; box-shadow: 0 14px 40px rgba(4,40,25,0.35);
-      color: #fff; transform-style: preserve-3d;
-      animation: quizIn 0.5s cubic-bezier(0.2, 0.8, 0.3, 1.1);
-      overflow: hidden;
+      position: relative; color: #fff; text-align: center;
+      background: linear-gradient(150deg, #0B2E1F, var(--gh-green-deep) 60%, #0A2E4F);
+      border: 2px solid rgba(252,209,22,0.4); border-radius: 22px; padding: 40px 28px 32px;
+      margin-bottom: 20px; box-shadow: 0 14px 40px rgba(4,40,25,0.3);
+      transform-style: preserve-3d; animation: quizIn 0.5s cubic-bezier(0.2,0.8,0.3,1.1); overflow: hidden;
     }
     @keyframes quizIn { from { transform: rotateX(-55deg); opacity: 0; } to { transform: rotateX(0); opacity: 1; } }
-    .quiz-card-q::after {
-      content: '★'; position: absolute; right: 16px; top: 10px;
-      color: rgba(252,209,22,0.25); font-size: 2.4rem; animation: star3d 7s linear infinite;
-    }
-    .quiz-emoji { font-size: 3rem; margin-bottom: 8px; display: inline-block; animation: quizEmoji 2.6s ease-in-out infinite; transform-style: preserve-3d; filter: drop-shadow(0 8px 8px rgba(0,0,0,0.4)); }
-    @keyframes quizEmoji {
-      0%,100% { transform: rotateY(0) translateY(0); }
-      50% { transform: rotateY(180deg) translateY(-8px); }
-    }
+    .quiz-card-q::after { content: '★'; position: absolute; right: 16px; top: 10px; color: rgba(252,209,22,0.25); font-size: 2.4rem; animation: starSpin 7s linear infinite; }
+    @keyframes starSpin { to { transform: rotateY(360deg); } }
+    .quiz-emoji { font-size: 3rem; margin-bottom: 8px; display: inline-block; animation: qe 2.6s ease-in-out infinite; transform-style: preserve-3d; filter: drop-shadow(0 8px 8px rgba(0,0,0,0.4)); }
+    @keyframes qe { 0%,100% { transform: rotateY(0) translateY(0); } 50% { transform: rotateY(180deg) translateY(-8px); } }
     .quiz-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 2px; color: var(--gh-gold); margin-bottom: 10px; font-weight: 800; }
-    .quiz-word { font-size: 2.1rem; font-weight: 900; color: #fff; margin-bottom: 14px; letter-spacing: -0.5px; }
-    .quiz-play {
-      padding: 10px 28px; border-radius: 999px; border: none;
-      background: linear-gradient(135deg, var(--gh-gold), var(--gh-gold-deep));
-      color: var(--gh-black); font-weight: 800; font-size: 0.9rem; cursor: pointer; font-family: inherit;
-      box-shadow: 0 4px 14px rgba(252,209,22,0.4); transition: transform 0.15s;
-    }
-    .quiz-play:hover { transform: scale(1.05); }
+    .quiz-word { font-family: 'Playfair Display', serif; font-size: 2.1rem; font-weight: 800; margin-bottom: 14px; }
+    .quiz-play { padding: 10px 28px; border-radius: 999px; border: none; background: linear-gradient(135deg, var(--gh-gold), var(--gh-gold-deep)); color: var(--gh-black); font-weight: 800; font-size: 0.9rem; cursor: pointer; font-family: inherit; box-shadow: 0 4px 14px rgba(252,209,22,0.4); }
     .quiz-opts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; perspective: 900px; }
     .quiz-opt {
-      padding: 16px; border-radius: 14px; border: 2px solid var(--border);
-      background: var(--card); font-size: 0.95rem; font-weight: 700; color: var(--gh-green-deep);
-      cursor: pointer; transition: all 0.2s; font-family: inherit; transform-style: preserve-3d;
+      padding: 16px; border-radius: 14px; border: 2px solid var(--line); background: #fff;
+      font-size: 0.95rem; font-weight: 700; color: var(--gh-green-deep); cursor: pointer;
+      transition: all 0.2s; font-family: inherit; transform-style: preserve-3d;
     }
-    .quiz-opt:hover { border-color: var(--gh-gold); transform: translateZ(16px) translateY(-2px); box-shadow: 0 10px 22px rgba(224,168,13,0.25); }
-    .quiz-opt.correct { border-color: var(--gh-green); background: linear-gradient(135deg, #E9FBF0, #D2F5E0); color: var(--gh-green); animation: flipWin 0.6s ease; }
+    .quiz-opt:hover { border-color: var(--gh-gold); transform: translateZ(16px) translateY(-2px); box-shadow: 0 10px 22px rgba(224,168,13,0.22); }
+    .quiz-opt.correct { border-color: var(--gh-green); background: linear-gradient(135deg,#E9FBF0,#D2F5E0); color: var(--gh-green); animation: flipWin 0.6s ease; }
     .quiz-opt.wrong { border-color: var(--gh-red); background: #FDECEE; color: var(--gh-red); animation: shake3d 0.5s ease; }
     @keyframes flipWin { 0% { transform: rotateX(0); } 45% { transform: rotateX(180deg) scale(1.05); } 100% { transform: rotateX(360deg); } }
-    @keyframes shake3d {
-      0%,100% { transform: translateX(0) rotateY(0); }
-      20% { transform: translateX(-8px) rotateY(-9deg); } 40% { transform: translateX(8px) rotateY(9deg); }
-      60% { transform: translateX(-5px) rotateY(-6deg); } 80% { transform: translateX(5px) rotateY(6deg); }
-    }
-    .quiz-next {
-      display: block; width: 100%; margin-top: 16px; padding: 14px; border-radius: 14px; border: none;
-      background: linear-gradient(135deg, var(--gh-red), #A50D1F);
-      color: #fff; font-size: 1rem; font-weight: 800; cursor: pointer; font-family: inherit;
-      box-shadow: 0 6px 18px rgba(206,17,38,0.35); transition: transform 0.15s;
-    }
-    .quiz-next:hover { transform: translateY(-2px); }
+    @keyframes shake3d { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-8px) rotateY(-9deg)} 40%{transform:translateX(8px) rotateY(9deg)} 60%{transform:translateX(-5px)} 80%{transform:translateX(5px)} }
+    .quiz-next { display: block; width: 100%; margin-top: 16px; padding: 14px; border-radius: 14px; border: none; background: linear-gradient(135deg, var(--gh-red), #A50D1F); color: #fff; font-size: 1rem; font-weight: 800; cursor: pointer; font-family: inherit; box-shadow: 0 6px 18px rgba(206,17,38,0.3); }
     .quiz-score { font-size: 3.4rem; font-weight: 900; color: var(--gh-gold); margin: 12px 0; text-shadow: 0 4px 18px rgba(252,209,22,0.5); }
-    .quiz-restart {
-      padding: 13px 36px; border-radius: 999px; border: none;
-      background: linear-gradient(135deg, var(--gh-gold), var(--gh-gold-deep));
-      color: var(--gh-black); font-size: 1rem; font-weight: 800; cursor: pointer; font-family: inherit;
-      box-shadow: 0 6px 18px rgba(252,209,22,0.4);
-    }
+    .quiz-restart { padding: 13px 36px; border-radius: 999px; border: none; background: linear-gradient(135deg, var(--gh-gold), var(--gh-gold-deep)); color: var(--gh-black); font-size: 1rem; font-weight: 800; cursor: pointer; font-family: inherit; }
 
-    /* ── Developer ────────────────────────────────────────────── */
-    .dev-wrap { max-width: 880px; margin: 0 auto; padding: 32px 24px; }
-    .dev-wrap h2 { font-size: 1.7rem; font-weight: 900; margin-bottom: 6px; letter-spacing: -0.5px; }
-    .dev-wrap h2 .gold { color: var(--gh-gold-deep); }
-    .dev-sub { color: var(--muted); font-size: 0.9rem; margin-bottom: 28px; }
-
+    /* ══ DEVELOPER ════════════════════════════════════════════ */
+    .dev-wrap { max-width: 880px; margin: 0 auto; padding: 18px 24px 60px; }
     .section-card {
-      background: var(--card); border: 1px solid var(--border); border-radius: 18px;
-      padding: 26px; margin-bottom: 22px; box-shadow: var(--shadow);
-      position: relative; overflow: hidden;
+      background: #fff; border: 1px solid var(--line); border-radius: 18px;
+      padding: 26px; margin-bottom: 22px; box-shadow: var(--shadow); position: relative; overflow: hidden;
     }
-    .section-card::before {
-      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
-      background: linear-gradient(90deg, var(--gh-red) 0 33%, var(--gh-gold) 33% 66%, var(--gh-green) 66% 100%);
-    }
+    .section-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+      background: linear-gradient(90deg, var(--gh-red) 0 33%, var(--gh-gold) 33% 66%, var(--gh-green) 66% 100%); }
     .section-card h3 { font-size: 1.05rem; font-weight: 800; margin-bottom: 14px; }
-
     .keygen-form { display: flex; flex-direction: column; gap: 12px; }
     .keygen-row { display: flex; gap: 12px; }
-    .keygen-form input {
-      flex: 1; padding: 11px 16px; border-radius: 12px; border: 1.5px solid var(--border);
-      font-size: 0.92rem; background: #FFFDF4; color: var(--text); outline: none; font-family: inherit; transition: all 0.2s;
-    }
-    .keygen-form input:focus { border-color: var(--gh-gold-deep); box-shadow: 0 0 0 4px rgba(252,209,22,0.18); }
-    .keygen-btn {
-      padding: 13px 28px; border-radius: 12px; border: none;
-      background: linear-gradient(135deg, var(--gh-green), var(--gh-green-deep));
-      color: #fff; font-weight: 800; font-size: 0.95rem; cursor: pointer; font-family: inherit;
-      box-shadow: 0 6px 16px rgba(0,107,63,0.3); transition: transform 0.15s;
-    }
+    .keygen-form input { flex: 1; padding: 11px 16px; border-radius: 12px; border: 1.5px solid var(--line); font-size: 0.92rem; background: #FBF8EF; outline: none; font-family: inherit; transition: all 0.2s; }
+    .keygen-form input:focus { border-color: var(--gh-gold-deep); box-shadow: 0 0 0 4px rgba(252,209,22,0.16); }
+    .keygen-btn { padding: 13px 28px; border-radius: 12px; border: none; background: linear-gradient(135deg, var(--gh-green), var(--gh-green-deep)); color: #fff; font-weight: 800; font-size: 0.95rem; cursor: pointer; font-family: inherit; box-shadow: 0 6px 16px rgba(0,107,63,0.25); transition: transform 0.15s; }
     .keygen-btn:hover { transform: translateY(-2px); }
-
-    .key-result { margin-top: 16px; padding: 18px; border-radius: 12px; background: var(--gh-green-dark); border: 1px solid var(--gh-green); display: none; }
-    .key-result.show { display: block; animation: viewIn 0.3s ease; }
+    .key-result { margin-top: 16px; padding: 18px; border-radius: 12px; background: #0B2E1F; border: 1px solid var(--gh-green); display: none; }
+    .key-result.show { display: block; }
     .key-val { font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: #7CE3A2; word-break: break-all; margin-bottom: 10px; }
-    .key-action-btn { padding: 7px 16px; border-radius: 999px; border: 1px solid var(--gh-green); background: transparent; color: #7CE3A2; font-size: 0.82rem; font-weight: 700; cursor: pointer; margin-right: 8px; font-family: inherit; transition: all 0.2s; }
+    .key-action-btn { padding: 7px 16px; border-radius: 999px; border: 1px solid var(--gh-green); background: transparent; color: #7CE3A2; font-size: 0.82rem; font-weight: 700; cursor: pointer; margin-right: 8px; font-family: inherit; }
     .key-action-btn:hover { background: var(--gh-green); color: #fff; }
-
     .tester { display: flex; flex-direction: column; gap: 10px; }
     .tester-row { display: flex; gap: 10px; }
-    .tester select, .tester input {
-      padding: 9px 12px; border-radius: 10px; border: 1px solid rgba(252,209,22,0.3);
-      background: var(--gh-green-dark); color: #D8E8D8; font-size: 0.84rem; outline: none; font-family: 'JetBrains Mono', monospace;
-    }
+    .tester select, .tester input { padding: 9px 12px; border-radius: 10px; border: 1px solid var(--line); background: #0B2E1F; color: #D8E8D8; font-size: 0.84rem; outline: none; font-family: 'JetBrains Mono', monospace; }
     .tester select { min-width: 200px; }
     .tester input { flex: 1; }
-    .test-btn {
-      padding: 9px 22px; border-radius: 10px; border: none;
-      background: linear-gradient(135deg, var(--gh-gold), var(--gh-gold-deep));
-      color: var(--gh-black); font-weight: 800; font-size: 0.85rem; cursor: pointer; font-family: inherit;
-    }
-    .test-output {
-      background: var(--gh-green-dark); border-radius: 12px; padding: 14px;
-      font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #A9C3A9;
-      min-height: 80px; white-space: pre-wrap; overflow-x: auto; border: 1px solid rgba(252,209,22,0.2);
-    }
-
+    .test-btn { padding: 9px 22px; border-radius: 10px; border: none; background: linear-gradient(135deg, var(--gh-gold), var(--gh-gold-deep)); color: var(--gh-black); font-weight: 800; font-size: 0.85rem; cursor: pointer; font-family: inherit; }
+    .test-output { background: #0B2E1F; border-radius: 12px; padding: 14px; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #A9C3A9; min-height: 80px; white-space: pre-wrap; overflow-x: auto; }
     .ep-list { display: flex; flex-direction: column; gap: 8px; }
-    .endpoint { background: var(--gh-green-dark); border-radius: 12px; border: 1px solid rgba(252,209,22,0.16); overflow: hidden; }
+    .endpoint { background: #0B2E1F; border-radius: 12px; overflow: hidden; }
     .ep-header { display: flex; align-items: center; gap: 10px; padding: 11px 14px; cursor: pointer; }
     .ep-header:hover { background: rgba(252,209,22,0.07); }
     .method { padding: 3px 9px; border-radius: 6px; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; font-weight: 700; }
     .GET { background: var(--gh-blue); color: #fff; }
     .POST { background: var(--gh-green); color: #fff; }
     .ep-path { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: #E8F2E8; flex: 1; }
-    .ep-badge { font-size: 0.68rem; padding: 2px 8px; border-radius: 999px; background: rgba(252,209,22,0.15); color: var(--gh-gold); border: 1px solid rgba(252,209,22,0.3); }
+    .ep-badge { font-size: 0.68rem; padding: 2px 8px; border-radius: 999px; background: rgba(252,209,22,0.15); color: var(--gh-gold); }
     .ep-desc { font-size: 0.76rem; color: #8FAF8F; }
     .ep-body { padding: 0 14px 14px; display: none; }
     .ep-body.open { display: block; }
     .ep-body pre { background: rgba(0,0,0,0.35); border-radius: 8px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.78rem; color: #C9DEC9; overflow-x: auto; margin-top: 8px; white-space: pre-wrap; }
-
     .integrations { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .int-card { background: var(--gh-green-dark); border: 1px solid rgba(252,209,22,0.16); border-radius: 14px; padding: 18px; }
+    .int-card { background: #0B2E1F; border-radius: 14px; padding: 18px; }
     .int-card h4 { font-size: 0.95rem; margin-bottom: 8px; color: var(--gh-gold); font-weight: 800; }
     .int-card p { font-size: 0.8rem; color: #8FAF8F; margin-bottom: 10px; }
     .int-card pre { background: rgba(0,0,0,0.35); border-radius: 8px; padding: 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; color: #B9D3B9; overflow-x: auto; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
-    .copy-code { margin-top: 8px; padding: 6px 14px; border-radius: 999px; border: 1px solid rgba(252,209,22,0.3); background: transparent; color: var(--gh-gold); font-size: 0.74rem; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+    .copy-code { margin-top: 8px; padding: 6px 14px; border-radius: 999px; border: 1px solid rgba(252,209,22,0.35); background: transparent; color: var(--gh-gold); font-size: 0.74rem; font-weight: 700; cursor: pointer; font-family: inherit; }
     .copy-code:hover { background: var(--gh-gold); color: var(--gh-black); }
 
-    footer {
-      margin-top: 30px; padding: 26px 24px 60px; text-align: center;
-      color: var(--muted); font-size: 0.8rem;
-    }
+    footer { background: var(--paper); padding: 26px 24px 44px; text-align: center; color: var(--muted); font-size: 0.8rem; }
     footer .motto { color: var(--gh-green); font-weight: 800; letter-spacing: 3px; font-size: 0.72rem; text-transform: uppercase; }
-    footer .motto .r { color: var(--gh-red); }
-    footer .motto .g { color: var(--gh-gold-deep); }
+    footer .motto .r { color: var(--gh-red); } footer .motto .g { color: var(--gh-gold-deep); }
 
-    @media (max-width: 640px) {
-      .integrations { grid-template-columns: 1fr; }
-      .word-grid { grid-template-columns: 1fr; }
-      .quiz-opts { grid-template-columns: 1fr; }
+    /* ══ SVG scene animations ═════════════════════════════════ */
+    .um-canopy { transform-origin: 800px 210px; animation: umRock 6s ease-in-out infinite; }
+    @keyframes umRock { 0%,100% { transform: rotate(-1.6deg); } 50% { transform: rotate(1.6deg); } }
+    .um-whisk { transform-origin: 705px 505px; animation: whisk 2.8s ease-in-out infinite; }
+    @keyframes whisk { 0%,100% { transform: rotate(-14deg); } 50% { transform: rotate(20deg); } }
+    .um-duster { animation: duster 3.4s ease-in-out infinite; transform-origin: center bottom; }
+    .um-duster.d2 { animation-delay: 0.6s; } .um-duster.d3 { animation-delay: 1.2s; } .um-duster.d4 { animation-delay: 1.8s; }
+    @keyframes duster { 0%,100% { transform: rotate(-7deg) translateY(0); } 50% { transform: rotate(7deg) translateY(-14px); } }
+    .um-queen { transform-origin: 800px 560px; animation: queenSway 5s ease-in-out infinite; }
+    @keyframes queenSway { 0%,100% { transform: rotate(-0.8deg); } 50% { transform: rotate(0.8deg); } }
+    .el-body { animation: elWalk 12s ease-in-out infinite; }
+    @keyframes elWalk { 0%,100% { transform: translateX(0) translateY(0); } 25% { transform: translateX(60px) translateY(-6px); } 50% { transform: translateX(120px); } 75% { transform: translateX(60px) translateY(-6px); } }
+    .el-trunk { transform-origin: 585px 505px; animation: trunk 4s ease-in-out infinite; }
+    @keyframes trunk { 0%,100% { transform: rotate(0); } 50% { transform: rotate(-9deg); } }
+    .el-palm { transform-origin: 800px 480px; animation: palmSway 6.5s ease-in-out infinite; }
+    @keyframes palmSway { 0%,100% { transform: rotate(-2deg); } 50% { transform: rotate(2.4deg); } }
+    .el-sun { transform-origin: 800px 330px; animation: sunGlow 7s ease-in-out infinite; }
+    @keyframes sunGlow { 0%,100% { transform: scale(1); } 50% { transform: scale(1.03); } }
+
+    @media (max-width: 700px) {
+      .integrations, .quiz-opts, .word-grid { grid-template-columns: 1fr; }
       .keygen-row { flex-direction: column; }
-      .actor.elephant { font-size: 3rem; }
-      .actor.palm { font-size: 2.6rem; }
+      .nav { gap: 6px; } .nav-btn { font-size: 0.82rem; }
+      .logo .word small { display: none; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: 0.001s !important; animation-iteration-count: 1 !important; transition-duration: 0.001s !important; }
@@ -414,116 +316,279 @@
 </head>
 <body>
 
-<div class="kente"></div>
+<!-- ══ BACKGROUND SLIDESHOW ══════════════════════════════════ -->
+<div class="bg-show" id="bgShow">
+
+  <!-- Slide 1: Pixar-style queen mother under the grand umbrella -->
+  <div class="slide" data-dur="9000">
+    <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-label="Festival queen under grand umbrella">
+      <defs>
+        <linearGradient id="skyU" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#8FB8E8"/><stop offset="0.55" stop-color="#C8D9EE"/><stop offset="1" stop-color="#E9D9B8"/>
+        </linearGradient>
+        <radialGradient id="canopyG" cx="0.5" cy="0.25" r="0.9">
+          <stop offset="0" stop-color="#FFE977"/><stop offset="0.55" stop-color="#E8B818"/><stop offset="1" stop-color="#B8860B"/>
+        </radialGradient>
+        <linearGradient id="skinG" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#8A5A34"/><stop offset="1" stop-color="#6B4226"/>
+        </linearGradient>
+      </defs>
+      <rect width="1600" height="900" fill="url(#skyU)"/>
+      <!-- distant crowd blur -->
+      <g opacity="0.5">
+        <ellipse cx="200" cy="700" rx="260" ry="130" fill="#9A86B8"/>
+        <ellipse cx="600" cy="730" rx="300" ry="140" fill="#8898C0"/>
+        <ellipse cx="1050" cy="710" rx="320" ry="150" fill="#A28BB4"/>
+        <ellipse cx="1440" cy="730" rx="260" ry="130" fill="#8CA6C4"/>
+      </g>
+      <!-- rainbow feather dusters -->
+      <g class="um-duster"><ellipse cx="240" cy="360" rx="46" ry="110" fill="#E85D9A" opacity="0.85"/><rect x="234" y="440" width="12" height="180" rx="6" fill="#7A5230"/></g>
+      <g class="um-duster d2"><ellipse cx="420" cy="300" rx="42" ry="100" fill="#58C0E8" opacity="0.85"/><rect x="414" y="380" width="12" height="200" rx="6" fill="#7A5230"/></g>
+      <g class="um-duster d3"><ellipse cx="1190" cy="320" rx="46" ry="108" fill="#8ED04A" opacity="0.85"/><rect x="1184" y="400" width="12" height="190" rx="6" fill="#7A5230"/></g>
+      <g class="um-duster d4"><ellipse cx="1380" cy="380" rx="42" ry="100" fill="#F5A83D" opacity="0.85"/><rect x="1374" y="460" width="12" height="170" rx="6" fill="#7A5230"/></g>
+      <!-- UMBRELLA -->
+      <g class="um-canopy">
+        <rect x="794" y="120" width="12" height="120" fill="#8A6420"/>
+        <circle cx="800" cy="116" r="16" fill="#FCD116" stroke="#8A6420" stroke-width="4"/>
+        <path d="M 800 180 C 560 180 380 300 350 430 L 1250 430 C 1220 300 1040 180 800 180 Z" fill="url(#canopyG)" stroke="#8A6420" stroke-width="6"/>
+        <g fill="#7A1B10" opacity="0.55">
+          <circle cx="640" cy="290" r="17"/><circle cx="800" cy="255" r="17"/><circle cx="960" cy="290" r="17"/>
+          <circle cx="540" cy="360" r="15"/><circle cx="720" cy="345" r="15"/><circle cx="880" cy="345" r="15"/><circle cx="1060" cy="360" r="15"/>
+        </g>
+        <path d="M 350 430 L 1250 430 L 1250 452 L 350 452 Z" fill="#2E86C8"/>
+        <path d="M 350 452 Q 380 540 420 452 Q 455 545 495 452 Q 530 540 570 452 Q 605 545 645 452 Q 680 540 720 452 Q 755 545 795 452 Q 830 540 870 452 Q 905 545 945 452 Q 980 540 1020 452 Q 1055 545 1095 452 Q 1130 540 1170 452 Q 1205 545 1250 452 L 1250 430 L 350 430 Z" fill="#C8281E"/>
+      </g>
+      <rect x="792" y="240" width="16" height="330" fill="#8A6420"/>
+      <!-- QUEEN -->
+      <g class="um-queen">
+        <path d="M 700 640 Q 800 600 900 640 L 900 760 L 700 760 Z" fill="#B8231A"/>
+        <path d="M 690 600 Q 700 560 730 560 L 870 560 Q 900 560 910 600 L 910 640 L 690 640 Z" fill="#D42B20"/>
+        <ellipse cx="800" cy="560" rx="26" ry="34" fill="#D42B20"/>
+        <path d="M 742 620 Q 800 560 858 620 L 858 700 L 742 700 Z" fill="#1B2E6B"/>
+        <g>
+          <rect x="742" y="640" width="116" height="14" fill="#FCD116"/>
+          <rect x="742" y="660" width="116" height="12" fill="#CE1126"/>
+          <rect x="742" y="678" width="116" height="12" fill="#006B3F"/>
+        </g>
+        <path d="M 760 560 Q 800 528 840 560 L 848 620 Q 800 596 752 620 Z" fill="#F2C879"/>
+        <circle cx="800" cy="500" r="46" fill="url(#skinG)"/>
+        <path d="M 754 486 Q 760 434 800 432 Q 842 434 846 486 Q 848 458 838 444 Q 852 452 850 470 Q 858 440 830 424 Q 800 410 770 424 Q 742 440 750 470 Q 748 452 762 444 Q 752 458 754 486 Z" fill="#F6F1E6"/>
+        <path d="M 752 470 Q 800 442 848 470 L 846 492 Q 800 466 754 492 Z" fill="#FFFFFF"/>
+        <circle cx="783" cy="500" r="5.5" fill="#241505"/>
+        <circle cx="817" cy="500" r="5.5" fill="#241505"/>
+        <path d="M 786 526 Q 800 536 814 526" stroke="#3A2210" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <circle cx="758" cy="512" r="7" fill="#FCD116"/>
+        <circle cx="842" cy="512" r="7" fill="#FCD116"/>
+        <g fill="#FCD116"><circle cx="778" cy="556" r="6"/><circle cx="792" cy="562" r="6"/><circle cx="808" cy="562" r="6"/><circle cx="822" cy="556" r="6"/></g>
+        <path d="M 756 580 Q 720 570 706 528" stroke="url(#skinG)" stroke-width="22" fill="none" stroke-linecap="round"/>
+        <g class="um-whisk">
+          <rect x="694" y="472" width="14" height="44" rx="7" fill="#8A6420"/>
+          <path d="M 701 472 Q 660 430 640 380 Q 690 420 701 440 Q 700 400 720 366 Q 716 420 707 444 Q 730 410 760 396 Q 726 436 708 460 Z" fill="#EDE6D6"/>
+        </g>
+        <path d="M 844 580 Q 872 566 878 530" stroke="url(#skinG)" stroke-width="22" fill="none" stroke-linecap="round"/>
+        <g fill="#FCD116"><circle cx="706" cy="520" r="7"/><circle cx="878" cy="524" r="7"/></g>
+        <rect x="712" y="700" width="176" height="52" rx="8" fill="#FFFFFF" stroke="#D9CDB0" stroke-width="2"/>
+        <text x="800" y="726" text-anchor="middle" font-family="Outfit, sans-serif" font-weight="800" font-size="21" fill="#B8231A">NANA EKUA</text>
+        <text x="800" y="746" text-anchor="middle" font-family="Outfit, sans-serif" font-weight="600" font-size="13" fill="#6B5D33">NKANFOA ↔ OHEMAA</text>
+      </g>
+      <!-- foreground crowd heads -->
+      <g fill="#241505">
+        <circle cx="120" cy="900" r="120"/><circle cx="330" cy="920" r="105"/><circle cx="1290" cy="915" r="110"/><circle cx="1500" cy="900" r="125"/>
+      </g>
+      <g fill="#3A2210"><circle cx="225" cy="940" r="95"/><circle cx="1395" cy="945" r="100"/></g>
+    </svg>
+  </div>
+
+  <!-- Slide 2: animated elephant sunset scene (reference art) -->
+  <div class="slide" data-dur="9000">
+    <svg viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg" aria-label="Elephant beneath palm at sunset">
+      <rect width="1600" height="900" fill="#152A78"/>
+      <g class="el-sun">
+        <circle cx="800" cy="330" r="330" fill="#FCD116"/>
+        <clipPath id="sunClip"><circle cx="800" cy="330" r="330"/></clipPath>
+        <g clip-path="url(#sunClip)">
+          <rect x="470" y="150" width="660" height="70" fill="#F7931E"/>
+          <rect x="470" y="230" width="660" height="55" fill="#F15A29"/>
+          <rect x="470" y="295" width="660" height="40" fill="#E8433A" opacity="0.85"/>
+          <ellipse cx="640" cy="200" rx="120" ry="16" fill="#FBD8B0" opacity="0.8"/>
+          <ellipse cx="950" cy="265" rx="140" ry="14" fill="#F9C08A" opacity="0.7"/>
+        </g>
+      </g>
+      <path d="M 0 620 Q 200 440 420 560 Q 560 470 760 570 Q 960 450 1180 570 Q 1360 480 1600 600 L 1600 700 L 0 700 Z" fill="#1E7A34"/>
+      <path d="M 0 660 Q 260 540 520 620 Q 800 520 1080 630 Q 1340 550 1600 650 L 1600 720 L 0 720 Z" fill="#166028" opacity="0.9"/>
+      <g class="el-palm">
+        <path d="M 790 480 L 812 480 L 806 260 L 796 260 Z" fill="#7A4A22"/>
+        <g fill="#1E7A34">
+          <path d="M 800 262 Q 660 200 560 250 Q 680 260 800 292 Z"/>
+          <path d="M 800 262 Q 940 200 1040 250 Q 920 260 800 292 Z"/>
+          <path d="M 800 258 Q 700 130 590 130 Q 710 180 796 272 Z"/>
+          <path d="M 800 258 Q 900 130 1010 130 Q 890 180 804 272 Z"/>
+          <path d="M 800 252 Q 790 110 720 70 Q 780 150 794 262 Z"/>
+          <path d="M 800 252 Q 810 110 880 70 Q 820 150 806 262 Z"/>
+        </g>
+      </g>
+      <rect x="0" y="700" width="1600" height="200" fill="#F5D327"/>
+      <rect x="0" y="690" width="1600" height="18" fill="#1E7A34"/>
+      <g fill="#1E7A34">
+        <path d="M 150 850 q 10 -46 22 0 q 8 -40 20 0 q 10 -34 20 0 Z"/>
+        <path d="M 1250 830 q 10 -46 22 0 q 8 -40 20 0 q 10 -34 20 0 Z"/>
+        <path d="M 1450 870 q 10 -40 20 0 q 8 -34 18 0 Z"/>
+      </g>
+      <g class="el-body">
+        <ellipse cx="700" cy="835" rx="230" ry="26" fill="#0E0E0E" opacity="0.8"/>
+        <path d="M 560 640 Q 570 560 660 545 Q 780 528 850 570 Q 920 610 905 700 Q 898 780 860 810 L 830 810 L 826 750 Q 760 770 700 752 L 700 812 L 668 812 Q 640 780 640 720 Q 596 700 578 672 Q 562 656 560 640 Z" fill="#9B9B9B"/>
+        <path d="M 700 752 L 704 812 L 736 812 L 736 758 Z" fill="#8A8A8A"/>
+        <path d="M 826 750 L 830 810 L 796 810 L 796 756 Z" fill="#8A8A8A"/>
+        <circle cx="620" cy="590" r="58" fill="#A6A6A6"/>
+        <path d="M 638 552 Q 700 528 706 580 Q 700 620 660 622 Q 636 600 638 552 Z" fill="#8F8F8F"/>
+        <g class="el-trunk">
+          <path d="M 585 560 Q 500 560 452 500 Q 420 462 430 430 Q 452 470 490 490 Q 545 516 592 520 Z" fill="#9B9B9B"/>
+          <path d="M 432 434 Q 445 452 470 466" stroke="#7E7E7E" stroke-width="6" fill="none" stroke-linecap="round"/>
+        </g>
+        <path d="M 578 620 Q 520 640 470 620 Q 520 662 580 650 Z" fill="#EFEFEA"/>
+        <path d="M 590 646 Q 540 672 496 660 Q 540 696 596 676 Z" fill="#EFEFEA"/>
+        <circle cx="612" cy="580" r="8" fill="#1B1B1B"/>
+        <path d="M 660 700 q 14 20 30 0" stroke="#7E7E7E" stroke-width="5" fill="none"/>
+      </g>
+    </svg>
+  </div>
+
+  <!-- Slides 3–5: your videos -->
+  <div class="slide" data-video="1"><video src="/slide1.mp4" muted playsinline preload="auto"></video></div>
+  <div class="slide" data-video="1"><video src="/slide2.mp4" muted playsinline preload="auto"></video></div>
+  <div class="slide" data-video="1"><video src="/slide3.mp4" muted playsinline preload="auto"></video></div>
+</div>
+<div class="bg-veil"></div>
+
+<!-- ══ PAGE ══════════════════════════════════════════════════ -->
+<div class="page">
+
 <header>
-  <div class="logo"><span class="star">★</span> Fante<span>API</span> 🇬🇭</div>
+  <div class="logo" onclick="showView('browse')">
+    <span class="sun"></span>
+    <span class="word">Fante<em>API</em><small>Kasa Fante · Ghana</small></span>
+  </div>
   <nav class="nav">
-    <button class="nav-btn active" onclick="showView('browse')">Browse</button>
+    <button class="nav-btn active" onclick="showView('browse')">Home</button>
     <button class="nav-btn" onclick="showView('quiz')">Quiz</button>
     <button class="nav-btn" onclick="showView('favs')">Favorites</button>
-    <button class="nav-btn" onclick="showView('developer')">🔑 Developer</button>
+    <button class="nav-btn" onclick="showView('developer')">Developer</button>
+    <div class="key-chip" id="keyChip" onclick="showView('developer')">No key</div>
   </nav>
-  <div class="key-chip" id="keyChip" onclick="showView('developer')">No key</div>
 </header>
 
-<!-- BROWSE -->
+<!-- BROWSE / HOME -->
 <div class="view active" id="view-browse">
   <div class="hero">
-    <span class="actor elephant">🐘</span>
-    <span class="actor palm">🌴</span>
-    <span class="actor bird">🦅</span>
-    <span class="actor star3d">★</span>
-    <div class="hero-inner">
-      <h1>Kasa <span class="gold">Fante!</span> Speak Fante.</h1>
-      <p>906 words &amp; phrases with native audio — from the heart of Ghana 🇬🇭</p>
-      <div class="hero-badges">
-        <span class="hero-badge">FREEDOM ★ AND ★ JUSTICE</span>
-        <span class="hero-badge">906 WORDS</span>
-        <span class="hero-badge">904 AUDIO</span>
-        <span class="hero-badge">30 CATEGORIES</span>
+    <div class="hero-copy">
+      <h1>Return to your roots,<br><span class="gold">Discover Fante.</span></h1>
+      <p>906 words &amp; phrases with native audio — the living language of Ghana's Central Coast. Akwaaba. 🇬🇭</p>
+      <div class="hero-cta">
+        <button class="btn-gold" onclick="document.getElementById('sheetBrowse').scrollIntoView({behavior:'smooth'})">Start Learning ↓</button>
+        <button class="btn-ghost" onclick="showView('quiz')">Take the Quiz</button>
       </div>
     </div>
+    <div class="slide-dots" id="slideDots"></div>
   </div>
-  <div class="search-row">
-    <input id="searchInput" type="text" placeholder="Search English or Fante..." oninput="filterWords()">
-    <span class="count-tag" id="countTag">—</span>
+
+  <div class="sheet" id="sheetBrowse">
+    <div class="sheet-head">
+      <h2>Explore the <span class="g">Language</span></h2>
+      <p>Tap any word to hear it spoken by a native speaker</p>
+    </div>
+    <div class="search-row">
+      <input id="searchInput" type="text" placeholder="Search English or Fante..." oninput="filterWords()">
+      <span class="count-tag" id="countTag">—</span>
+    </div>
+    <div class="cat-bar" id="catBar"></div>
+    <div class="word-grid" id="wordGrid"></div>
   </div>
-  <div class="cat-bar" id="catBar"></div>
-  <div class="word-grid" id="wordGrid"></div>
+
+  <div class="bg-window"><span>“Kasa Fante — Speak Fante” 🇬🇭</span></div>
 </div>
 
 <!-- QUIZ -->
 <div class="view" id="view-quiz">
-  <div class="quiz-wrap" id="quizWrap"></div>
+  <div class="bg-window" style="height:22vh"><span>Test your Fante ✨</span></div>
+  <div class="sheet">
+    <div class="sheet-head"><h2>Fante <span class="g">Quiz</span></h2><p>20 questions — listen, choose, learn</p></div>
+    <div class="quiz-wrap" id="quizWrap"></div>
+  </div>
 </div>
 
 <!-- FAVS -->
 <div class="view" id="view-favs">
-  <div class="search-row">
-    <input type="text" placeholder="Search favorites..." oninput="filterFavs(this.value)">
-    <span class="count-tag" id="favCount">—</span>
+  <div class="bg-window" style="height:22vh"><span>Your saved words ★</span></div>
+  <div class="sheet">
+    <div class="sheet-head"><h2>Your <span class="g">Favorites</span></h2><p>Words you've starred while exploring</p></div>
+    <div class="search-row">
+      <input type="text" placeholder="Search favorites..." oninput="filterFavs(this.value)">
+      <span class="count-tag" id="favCount">—</span>
+    </div>
+    <div class="word-grid" id="favGrid"></div>
   </div>
-  <div class="word-grid" id="favGrid"></div>
 </div>
 
 <!-- DEVELOPER -->
 <div class="view" id="view-developer">
-<div class="dev-wrap">
-  <h2>🔑 Fante API — <span class="gold">Developer Hub</span></h2>
-  <p class="dev-sub">Generate your API key and build Fante-speaking bots for Telegram, WhatsApp, and more. 906 words · 904 audio files · 30 categories.</p>
+  <div class="bg-window" style="height:22vh"><span>Build with FanteAPI 🔑</span></div>
+  <div class="sheet">
+    <div class="sheet-head"><h2>Developer <span class="g">Hub</span></h2><p>Generate your API key and build Fante-speaking bots for Telegram, WhatsApp, and more · 906 words · 904 audio · 30 categories</p></div>
+    <div class="dev-wrap">
 
-  <div class="section-card">
-    <h3>⚡ Generate Your API Key</h3>
-    <div class="keygen-form">
-      <div class="keygen-row">
-        <input id="kgName" type="text" placeholder="Your name or bot name (required)">
-        <input id="kgEmail" type="email" placeholder="Email (optional)">
+      <div class="section-card">
+        <h3>⚡ Generate Your API Key</h3>
+        <div class="keygen-form">
+          <div class="keygen-row">
+            <input id="kgName" type="text" placeholder="Your name or bot name (required)">
+            <input id="kgEmail" type="email" placeholder="Email (optional)">
+          </div>
+          <button class="keygen-btn" onclick="generateKey()">Generate Free API Key</button>
+        </div>
+        <div class="key-result" id="keyResult">
+          <div style="font-size:0.75rem;color:#8FAF8F;margin-bottom:6px;">Your API Key — save this now:</div>
+          <div class="key-val" id="keyVal"></div>
+          <button class="key-action-btn" onclick="copyKey()">Copy Key</button>
+          <button class="key-action-btn" onclick="activateKey()">Use This Key ✓</button>
+        </div>
       </div>
-      <button class="keygen-btn" onclick="generateKey()">Generate Free API Key</button>
-    </div>
-    <div class="key-result" id="keyResult">
-      <div style="font-size:0.75rem;color:#8FAF8F;margin-bottom:6px;">Your API Key — save this now:</div>
-      <div class="key-val" id="keyVal"></div>
-      <button class="key-action-btn" onclick="copyKey()">Copy Key</button>
-      <button class="key-action-btn" onclick="activateKey()">Use This Key ✓</button>
-    </div>
-  </div>
 
-  <div class="section-card">
-    <h3>🧪 Live API Tester</h3>
-    <div class="tester">
-      <div class="tester-row">
-        <select id="testEndpoint" onchange="document.getElementById('testUrl').value=this.value">
-          <option value="/api/words?limit=5">GET /api/words</option>
-          <option value="/api/categories">GET /api/categories</option>
-          <option value="/api/translate?q=hello&dir=en-fante">GET /api/translate</option>
-          <option value="/api/chat?message=how do you say water">GET /api/chat</option>
-          <option value="/api/random">GET /api/random</option>
-          <option value="/api/random?category=greeting">GET /api/random?category=greeting</option>
-          <option value="/api/words/1">GET /api/words/:id</option>
-          <option value="/api/quiz?count=3">GET /api/quiz</option>
-          <option value="/api/word-of-the-day">GET /api/word-of-the-day</option>
-          <option value="/api/keys/me">GET /api/keys/me</option>
-          <option value="/api/health">GET /api/health</option>
-        </select>
-        <input id="testUrl" type="text" value="/api/words?limit=5">
-        <button class="test-btn" onclick="runTest()">Run ▶</button>
+      <div class="section-card">
+        <h3>🧪 Live API Tester</h3>
+        <div class="tester">
+          <div class="tester-row">
+            <select id="testEndpoint" onchange="document.getElementById('testUrl').value=this.value">
+              <option value="/api/words?limit=5">GET /api/words</option>
+              <option value="/api/categories">GET /api/categories</option>
+              <option value="/api/translate?q=hello&dir=en-fante">GET /api/translate</option>
+              <option value="/api/chat?message=how do you say water">GET /api/chat</option>
+              <option value="/api/random">GET /api/random</option>
+              <option value="/api/random?category=greeting">GET /api/random?category=greeting</option>
+              <option value="/api/words/1">GET /api/words/:id</option>
+              <option value="/api/quiz?count=3">GET /api/quiz</option>
+              <option value="/api/word-of-the-day">GET /api/word-of-the-day</option>
+              <option value="/api/keys/me">GET /api/keys/me</option>
+              <option value="/api/health">GET /api/health</option>
+            </select>
+            <input id="testUrl" type="text" value="/api/words?limit=5">
+            <button class="test-btn" onclick="runTest()">Run ▶</button>
+          </div>
+          <div class="test-output" id="testOutput">// Select an endpoint and click Run</div>
+        </div>
       </div>
-      <div class="test-output" id="testOutput">// Select an endpoint and click Run</div>
+
+      <div class="section-card">
+        <h3>📚 API Reference</h3>
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:14px;">All endpoints except <code>/api/keys/generate</code> and <code>/api/health</code> require <code>X-Api-Key</code> header or <code>?api_key=</code> param.</p>
+        <div class="ep-list" id="epList"></div>
+      </div>
+
+      <div class="section-card">
+        <h3>🤖 Bot Integration Guides</h3>
+        <div class="integrations" id="intGuides"></div>
+      </div>
     </div>
   </div>
-
-  <div class="section-card">
-    <h3>📚 API Reference</h3>
-    <p style="font-size:0.82rem;color:var(--muted);margin-bottom:14px;">All endpoints except <code>/api/keys/generate</code> and <code>/api/health</code> require <code>X-Api-Key</code> header or <code>?api_key=</code> param.</p>
-    <div class="ep-list" id="epList"></div>
-  </div>
-
-  <div class="section-card">
-    <h3>🤖 Bot Integration Guides</h3>
-    <div class="integrations" id="intGuides"></div>
-  </div>
-</div>
 </div>
 
 <footer>
@@ -531,12 +596,41 @@
   <div style="margin-top:8px">FanteAPI — preserving and sharing the Fante language of Ghana 🇬🇭</div>
 </footer>
 
+</div><!-- /page -->
+
 <script>
 let allWords = [], filtered = [], activeCategory = 'all';
 let currentAudio = null, playingId = null;
 let favorites = JSON.parse(localStorage.getItem('fanteFavs') || '[]');
 let apiKey = localStorage.getItem('fanteApiKey') || '';
 let quizState = {};
+
+/* ══ BACKGROUND SLIDESHOW ═══════════════════════════════════ */
+const slides = [...document.querySelectorAll('#bgShow .slide')];
+let slideIdx = -1, slideTimer = null;
+const dotsBox = document.getElementById('slideDots');
+slides.forEach((_, i) => { const d = document.createElement('div'); d.className = 'dot'; dotsBox.appendChild(d); });
+
+function nextSlide() {
+  clearTimeout(slideTimer);
+  const prev = slideIdx;
+  slideIdx = (slideIdx + 1) % slides.length;
+  slides.forEach((s, i) => s.classList.toggle('on', i === slideIdx));
+  document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('on', i === slideIdx));
+  if (prev >= 0) { const pv = slides[prev].querySelector('video'); if (pv) pv.pause(); }
+  const s = slides[slideIdx];
+  const v = s.querySelector('video');
+  if (v) {
+    v.currentTime = 0;
+    v.onended = nextSlide;
+    const p = v.play();
+    if (p) p.catch(() => { slideTimer = setTimeout(nextSlide, 9000); });
+    slideTimer = setTimeout(nextSlide, (v.duration && isFinite(v.duration) ? v.duration * 1000 : 10000) + 2500); // fallback
+  } else {
+    slideTimer = setTimeout(nextSlide, Number(s.dataset.dur) || 9000);
+  }
+}
+nextSlide();
 
 const CAT = {
   all:'All', shopping:'Shopping', food_drinks:'Food & Drinks',
@@ -551,7 +645,6 @@ const CAT = {
   essential_vocabulary:'Essential', numbers:'Numbers', conjugation:'Conjugation',
 };
 
-/* Category → 3D animated emoji totem */
 const CAT_EMOJI = {
   animals:'🐘', colours:'🎨', conjugation:'✍️', cooking:'🍲', dating:'❤️',
   directions:'🧭', electronics:'📱', emergency:'🚨', essential_vocabulary:'⭐',
@@ -562,7 +655,6 @@ const CAT_EMOJI = {
   transport:'🚌', weather:'⛅', well_being:'🧘',
 };
 
-/* Word-specific emoji — matches the meaning of the word/phrase */
 const WORD_EMOJI = [
   [/elephant/i,'🐘'],[/\blion\b/i,'🦁'],[/\bcat\b/i,'🐈'],[/\bdog\b/i,'🐕'],[/goat/i,'🐐'],
   [/sheep/i,'🐑'],[/\bbird\b/i,'🐦'],[/fish/i,'🐟'],[/crocodile/i,'🐊'],[/monkey/i,'🐒'],
@@ -633,7 +725,6 @@ async function init() {
   initTilt();
 }
 
-/* 3D tilt-on-hover via event delegation (cheap for 900+ cards) */
 function initTilt() {
   document.body.addEventListener('pointermove', e => {
     const card = e.target.closest && e.target.closest('.word-card');
@@ -657,6 +748,7 @@ function showView(name) {
   if (idx >= 0) document.querySelectorAll('.nav-btn')[idx].classList.add('active');
   if (name === 'quiz') startQuiz();
   if (name === 'favs') renderFavs('');
+  window.scrollTo({ top: 0 });
 }
 
 function selectCat(cat) {
@@ -838,7 +930,7 @@ function buildDocs() {
     {m:'GET',p:'/api/categories',auth:true,d:'All categories with counts',
      res:'[{ "name": "greeting", "count": 12 }, ...]'},
     {m:'GET',p:'/api/translate',auth:true,d:'Translate — ?q=hello&dir=en-fante (or fante-en)',
-     res:'{ "english": "Hello", "fante": "...", "audio_url": "http://localhost:3747/audio/..." }'},
+     res:'{ "english": "Hello", "fante": "...", "audio_url": "..." }'},
     {m:'GET',p:'/api/chat',auth:true,d:'Chatbot NLU — ?message=how do you say water',
      res:'{ "reply": "...", "audio_url": "...", "word": {...} }'},
     {m:'GET',p:'/api/random',auth:true,d:'Random word — ?category=animals (optional)',
@@ -870,7 +962,7 @@ function buildDocs() {
 
 function buildIntegrations() {
   const key = apiKey || 'YOUR_FANTE_API_KEY';
-  const base = 'http://localhost:3747';
+  const base = location.origin;
   const guides = [
     { icon:'✈️', title:'Telegram Bot (Node.js)', desc:'Send Fante translations and audio in Telegram chats.',
       code:`// npm install node-telegram-bot-api node-fetch
@@ -881,7 +973,6 @@ const bot = new TelegramBot('YOUR_TELEGRAM_BOT_TOKEN', { polling: true });
 const API_KEY = '${key}';
 const BASE = '${base}/api';
 
-// Any message → auto-translate via chat endpoint
 bot.on('message', async (msg) => {
   const res = await fetch(BASE + '/chat?message=' + encodeURIComponent(msg.text || ''),
     { headers: { 'X-Api-Key': API_KEY } });
@@ -890,7 +981,6 @@ bot.on('message', async (msg) => {
   if (data.audio_url) await bot.sendAudio(msg.chat.id, data.audio_url);
 });
 
-// /translate <word>
 bot.onText(/\\/translate (.+)/, async (msg, match) => {
   const res = await fetch(BASE + '/translate?q=' + encodeURIComponent(match[1]),
     { headers: { 'X-Api-Key': API_KEY } });
@@ -901,7 +991,6 @@ bot.onText(/\\/translate (.+)/, async (msg, match) => {
   } else bot.sendMessage(msg.chat.id, 'No translation found.');
 });
 
-// /learn — random word
 bot.onText(/\\/learn/, async (msg) => {
   const res = await fetch(BASE + '/random', { headers: { 'X-Api-Key': API_KEY } });
   const w = await res.json();
@@ -937,15 +1026,6 @@ client.on('message', async (msg) => {
     const w = await res.json();
     msg.reply('📖 *' + w.english + '* = _' + w.fante + '_');
   }
-
-  if (text.startsWith('!category ')) {
-    const cat = text.slice(10).trim();
-    const res = await fetch(BASE + '/words?category=' + cat + '&limit=5',
-      { headers: { 'X-Api-Key': API_KEY } });
-    const data = await res.json();
-    const list = data.words.map(w => '• ' + w.english + ' → ' + w.fante).join('\\n');
-    msg.reply(list || 'Category not found.');
-  }
 });
 
 client.initialize();`},
@@ -968,28 +1048,13 @@ def random_word(category=None):
     params = {'category':category} if category else {}
     return requests.get(BASE+'/random', params=params, headers=H).json()
 
-def search(query, category=None):
-    params = {'search':query,'limit':10}
-    if category: params['category'] = category
-    return requests.get(BASE+'/words', params=params, headers=H).json()
-
-# Examples
 print(translate('good morning'))
-# {'english':'Good morning','fante':'Maakye','audio_url':'...'}
-
 print(chat('how do you say water'))
-# {'reply': '"Can I have some water" in Fante is "..."', ...}
-
-print(random_word('animals'))
-# {'english':'Cat','fante':'...','audio_url':'...'}`},
+print(random_word('animals'))`},
     { icon:'🌐', title:'cURL / REST', desc:'Use from any language, shell, or API client.',
       code:`# Translate English → Fante
 curl -H "X-Api-Key: ${key}" \\
   "${base}/api/translate?q=hello"
-
-# Translate Fante → English
-curl -H "X-Api-Key: ${key}" \\
-  "${base}/api/translate?q=Maakye&dir=fante-en"
 
 # Chat / NLU
 curl -H "X-Api-Key: ${key}" \\
@@ -999,12 +1064,13 @@ curl -H "X-Api-Key: ${key}" \\
 curl -H "X-Api-Key: ${key}" \\
   "${base}/api/random?category=greeting"
 
-# Browse all greetings
+# Quiz questions
 curl -H "X-Api-Key: ${key}" \\
-  "${base}/api/words?category=greeting&limit=20"
+  "${base}/api/quiz?count=5"
 
-# Get audio file
-curl "${base}/audio/hello_hlo.mp3" > hello.mp3
+# Word of the day
+curl -H "X-Api-Key: ${key}" \\
+  "${base}/api/word-of-the-day"
 
 # Check key usage
 curl -H "X-Api-Key: ${key}" \\
