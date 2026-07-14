@@ -19,21 +19,23 @@
       --gh-green-deep: #043823;
       --gh-black: #101010;
       --gh-blue: #2A6DB5;
-      --paper: #FFFFFF;
-      --card: #FFFFFF;
-      --field: #FBF8EF;
+      --paper: rgba(255,255,255,0.90);
+      --solid: #FFFFFF;
+      --card: rgba(255,255,255,0.72);
+      --field: rgba(247,240,222,0.75);
       --ink: #17130C;
       --muted: #8A7430;
-      --line: #EFE6CB;
+      --line: rgba(214,197,150,0.55);
       --shadow: 0 10px 30px rgba(6,46,31,0.10);
     }
     html[data-theme="dark"] {
-      --paper: #14130E;
-      --card: #201E15;
-      --field: #262316;
+      --paper: rgba(16,15,10,0.84);
+      --solid: #14130E;
+      --card: rgba(38,35,22,0.72);
+      --field: rgba(48,44,26,0.75);
       --ink: #F2EAD3;
       --muted: #C9B36B;
-      --line: #3A351F;
+      --line: rgba(90,82,48,0.55);
       --shadow: 0 10px 30px rgba(0,0,0,0.55);
     }
 
@@ -59,6 +61,7 @@
     /* White minimal header (Sankofa style) */
     header {
       background: var(--paper); height: 76px;
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
       display: flex; align-items: center; gap: 20px; padding: 0 clamp(16px, 4vw, 48px);
       position: sticky; top: 0; z-index: 100;
       box-shadow: 0 1px 0 rgba(0,0,0,0.06);
@@ -99,7 +102,7 @@
     .view.active { display: block; }
 
     /* ══ HERO (transparent — slideshow visible) ═══════════════ */
-    .hero { min-height: 78vh; display: flex; align-items: center; padding: 0 clamp(20px, 7vw, 110px); }
+    .hero { min-height: calc(100vh - 76px); display: flex; align-items: center; padding: 0 clamp(20px, 7vw, 110px); }
     .hero-copy { max-width: 640px; color: #fff; animation: rise 0.9s ease both; }
     @keyframes rise { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
     .hero-copy h1 {
@@ -131,6 +134,7 @@
     /* ══ WHITE SHEETS ═════════════════════════════════════════ */
     .sheet {
       background: var(--paper); border-radius: 26px 26px 0 0; position: relative;
+      backdrop-filter: blur(14px) saturate(1.15); -webkit-backdrop-filter: blur(14px) saturate(1.15);
       box-shadow: 0 -14px 40px rgba(0,0,0,0.25);
     }
     .sheet::before { /* kente thread */
@@ -299,7 +303,7 @@
     .copy-code { margin-top: 8px; padding: 6px 14px; border-radius: 999px; border: 1px solid rgba(252,209,22,0.35); background: transparent; color: var(--gh-gold); font-size: 0.74rem; font-weight: 700; cursor: pointer; font-family: inherit; }
     .copy-code:hover { background: var(--gh-gold); color: var(--gh-black); }
 
-    footer { background: var(--paper); padding: 26px 24px 44px; text-align: center; color: var(--muted); font-size: 0.8rem; }
+    footer { background: var(--paper); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 26px 24px 44px; text-align: center; color: var(--muted); font-size: 0.8rem; }
     footer .motto { color: var(--gh-green); font-weight: 800; letter-spacing: 3px; font-size: 0.72rem; text-transform: uppercase; }
     footer .motto .r { color: var(--gh-red); } footer .motto .g { color: var(--gh-gold-deep); }
 
@@ -322,7 +326,7 @@
     .modal-wrap { position: fixed; inset: 0; z-index: 300; display: none; align-items: center; justify-content: center; background: rgba(8,10,8,0.62); padding: 18px; }
     .modal-wrap.open { display: flex; }
     .modal {
-      width: min(480px, 100%); background: var(--paper); border-radius: 22px; padding: 30px 26px;
+      width: min(480px, 100%); background: var(--solid); border-radius: 22px; padding: 30px 26px;
       box-shadow: 0 30px 80px rgba(0,0,0,0.5); position: relative; text-align: center;
       animation: quizIn 0.4s cubic-bezier(0.2,0.8,0.3,1.1);
     }
@@ -708,16 +712,17 @@ let slideIdx = -1, slideTimer = null;
 const dotsBox = document.getElementById('slideDots');
 slides.forEach((_, i) => { const d = document.createElement('div'); d.className = 'dot'; dotsBox.appendChild(d); });
 
+// warm up video loading early (Safari won't preload without a nudge)
+slides.forEach(s => { const v = s.querySelector('video'); if (v) try { v.load(); } catch (e) {} });
+
 function nextSlide() {
   clearTimeout(slideTimer);
   const prev = slideIdx;
-  // pick next slide; skip video slides that haven't buffered enough yet
+  // skip only slides marked dead (e.g. missing image)
   let n = slideIdx, tries = 0;
   do {
     n = (n + 1) % slides.length;
-    const s = slides[n];
-    const cand = s.querySelector('video');
-    if (s.dataset.dead !== '1' && (!cand || cand.readyState >= 3)) break;
+    if (slides[n].dataset.dead !== '1') break;
     tries++;
   } while (tries < slides.length);
   slideIdx = n;
@@ -727,11 +732,18 @@ function nextSlide() {
   const s = slides[slideIdx];
   const v = s.querySelector('video');
   if (v) {
+    let advanced = false;
+    const advance = () => { if (!advanced) { advanced = true; nextSlide(); } };
     v.currentTime = 0;
-    v.onended = nextSlide;
+    v.onended = advance;
+    // guard 1: if the video isn't actually rendering frames within 3.5s, move on
+    let started = false;
+    v.onplaying = () => { started = true; };
+    setTimeout(() => { if (!started) advance(); }, 3500);
+    // guard 2: hard cap in case 'ended' never fires
+    slideTimer = setTimeout(advance, ((isFinite(v.duration) && v.duration) ? v.duration * 1000 : 11000) + 3000);
     const p = v.play();
-    if (p) p.catch(() => { slideTimer = setTimeout(nextSlide, 9000); });
-    slideTimer = setTimeout(nextSlide, (v.duration && isFinite(v.duration) ? v.duration * 1000 : 10000) + 2500); // fallback
+    if (p && p.catch) p.catch(() => advance());
   } else {
     slideTimer = setTimeout(nextSlide, Number(s.dataset.dur) || 9000);
   }
