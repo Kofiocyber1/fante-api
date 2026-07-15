@@ -352,12 +352,15 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Internal server error' });
 });
 
-// ── Start & graceful shutdown ─────────────────────────────────────────────────
-const server = app.listen(PORT, () => console.log(`Fante API v${VERSION} → http://localhost:${PORT}`));
-for (const sig of ['SIGTERM', 'SIGINT']) {
-  process.on(sig, () => {
-    console.log(`${sig} received, shutting down…`);
-    server.close(() => process.exit(0));
-    setTimeout(() => process.exit(1), 10000).unref();
-  });
+// ── Start & graceful shutdown (skipped on serverless/Vercel) ─────────────────
+module.exports = app;
+if (require.main === module) {
+  const server = app.listen(PORT, () => console.log(`Fante API v${VERSION} → http://localhost:${PORT}`));
+  for (const sig of ['SIGTERM', 'SIGINT']) {
+    process.on(sig, () => {
+      console.log(`${sig} received, shutting down…`);
+      server.close(() => process.exit(0));
+      setTimeout(() => process.exit(1), 10000).unref();
+    });
+  }
 }

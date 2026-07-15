@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "builds": [
+    { "src": "api/index.js", "use": "@vercel/node", "config": { "includeFiles": ["public/data.json"] } },
+    { "src": "public/**", "use": "@vercel/static" },
+    { "src": "audio/**", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/api/index.js" },
+    { "src": "/audio/(.*)", "dest": "/audio/$1", "headers": { "Cache-Control": "public, max-age=2592000, immutable" } },
+    { "src": "/(.+\\..+)", "dest": "/public/$1" },
+    { "src": "/(.*)", "dest": "/public/index.html" }
+  ]
+}
