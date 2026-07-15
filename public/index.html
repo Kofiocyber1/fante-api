@@ -322,6 +322,32 @@
     .buy-btn:hover { transform: translateY(-2px); }
     .buy-btn.free { background: var(--field); color: var(--muted); box-shadow: none; cursor: default; }
 
+    /* ══ Community ════════════════════════════════════════════ */
+    .rec-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .rec-btn {
+      padding: 12px 22px; border-radius: 999px; border: 2px solid var(--gh-red); cursor: pointer;
+      background: transparent; color: var(--gh-red); font-weight: 800; font-size: 0.9rem; font-family: inherit;
+      transition: all 0.2s;
+    }
+    .rec-btn.recording { background: var(--gh-red); color: #fff; animation: recPulse 1.2s ease-in-out infinite; }
+    @keyframes recPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(206,17,38,0.5); } 50% { box-shadow: 0 0 0 12px rgba(206,17,38,0); } }
+    .rec-status { font-size: 0.8rem; color: var(--muted); font-weight: 700; }
+    .status-chip { display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.4px; }
+    .st-pending { background: rgba(252,209,22,0.18); color: var(--gh-gold-deep); border: 1px solid rgba(224,168,13,0.4); }
+    .st-approved { background: rgba(0,107,63,0.14); color: var(--gh-green); border: 1px solid rgba(0,107,63,0.4); }
+    .st-changes_requested { background: rgba(42,109,181,0.14); color: var(--gh-blue); border: 1px solid rgba(42,109,181,0.4); }
+    .st-rejected { background: rgba(206,17,38,0.12); color: var(--gh-red); border: 1px solid rgba(206,17,38,0.35); }
+    .track-item { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; background: var(--card); }
+    .progress-line { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 0.68rem; color: var(--muted); font-weight: 700; }
+    .p-step { flex: 1; height: 5px; border-radius: 3px; background: var(--line); }
+    .p-step.done { background: var(--gh-green); }
+    .p-step.now { background: var(--gh-gold); animation: recPulse 1.6s ease-in-out infinite; }
+    .p-step.bad { background: var(--gh-red); }
+    .flag-btn { background: none; border: none; font-size: 0.85rem; cursor: pointer; opacity: 0.25; transition: all 0.2s; transform: translateZ(24px); }
+    .flag-btn:hover { opacity: 0.9; }
+    .comm-badge { font-size: 0.6rem; font-weight: 800; letter-spacing: 0.5px; color: var(--gh-blue); border: 1px solid var(--gh-blue); border-radius: 999px; padding: 1px 7px; margin-left: 6px; vertical-align: 2px; }
+    .wc-zh { font-size: 0.85rem; color: var(--gh-blue); font-weight: 600; margin-top: 2px; }
+
     /* ══ Paywall modal ════════════════════════════════════════ */
     .modal-wrap { position: fixed; inset: 0; z-index: 300; display: none; align-items: center; justify-content: center; background: rgba(8,10,8,0.62); padding: 18px; }
     .modal-wrap.open { display: flex; }
@@ -397,11 +423,13 @@
     <span class="word">Learn Fante <em>API</em><small>Learn Fante Language</small></span>
   </div>
   <nav class="nav">
-    <button class="nav-btn active" onclick="showView('browse')">Home</button>
-    <button class="nav-btn" onclick="showView('quiz')">Quiz</button>
-    <button class="nav-btn" onclick="showView('favs')">Favorites</button>
-    <button class="nav-btn" onclick="showView('pricing')">Pricing</button>
-    <button class="nav-btn" onclick="showView('developer')">Developer</button>
+    <button class="nav-btn active" onclick="showView('browse')" data-i18n="nav_home">Home</button>
+    <button class="nav-btn" onclick="showView('quiz')" data-i18n="nav_quiz">Quiz</button>
+    <button class="nav-btn" onclick="showView('favs')" data-i18n="nav_favs">Favorites</button>
+    <button class="nav-btn" onclick="showView('pricing')" data-i18n="nav_pricing">Pricing</button>
+    <button class="nav-btn" onclick="showView('community')" data-i18n="nav_community">Community</button>
+    <button class="nav-btn" onclick="showView('developer')" data-i18n="nav_dev">Developer</button>
+    <button class="theme-btn" id="langBtn" onclick="toggleLang()" title="English / 中文" style="width:auto;padding:0 12px;font-size:0.8rem;font-weight:800">中文</button>
     <button class="theme-btn" id="themeBtn" onclick="toggleTheme()" title="Light / dark mode">🌙</button>
     <div class="key-chip" id="keyChip" onclick="showView('developer')">No key</div>
   </nav>
@@ -411,11 +439,11 @@
 <div class="view active" id="view-browse">
   <div class="hero">
     <div class="hero-copy">
-      <h1>Return to your roots,<br><span class="gold">Discover Fante.</span></h1>
-      <p>906 words &amp; phrases with native audio — the living language of Ghana's Central Coast. Akwaaba. 🇬🇭</p>
+      <h1 id="heroTitle">Return to your roots,<br><span class="gold">Discover Fante.</span></h1>
+      <p data-i18n="hero_sub">906 words &amp; phrases with native audio — the living language of Ghana's Central Coast. Akwaaba. 🇬🇭</p>
       <div class="hero-cta">
-        <button class="btn-gold" onclick="document.getElementById('sheetBrowse').scrollIntoView({behavior:'smooth'})">Start Learning ↓</button>
-        <button class="btn-ghost" onclick="showView('quiz')">Take the Quiz</button>
+        <button class="btn-gold" onclick="document.getElementById('sheetBrowse').scrollIntoView({behavior:'smooth'})" data-i18n="hero_cta1">Start Learning ↓</button>
+        <button class="btn-ghost" onclick="showView('quiz')" data-i18n="hero_cta2">Take the Quiz</button>
       </div>
     </div>
     <div class="slide-dots" id="slideDots"></div>
@@ -423,8 +451,8 @@
 
   <div class="sheet" id="sheetBrowse">
     <div class="sheet-head">
-      <h2>Explore the <span class="g">Language</span></h2>
-      <p>Tap any word to hear it spoken by a native speaker</p>
+      <h2 data-i18n="browse_h">Explore the <span class="g">Language</span></h2>
+      <p data-i18n="browse_p">Tap any word to hear it spoken by a native speaker</p>
     </div>
     <div class="search-row">
       <input id="searchInput" type="text" placeholder="Search English or Fante..." oninput="filterWords()">
@@ -493,6 +521,74 @@
       <p style="text-align:center;font-size:0.85rem;color:var(--muted);font-style:italic;">
         For any issues with subscribing to the products listed above, please email <b>subscriptions@learnfanteapi.com</b>
       </p>
+    </div>
+  </div>
+</div>
+
+<!-- COMMUNITY -->
+<div class="view" id="view-community">
+  <div class="bg-window" style="height:22vh"><span data-i18n="comm_window">Your voice, our language 🎙️</span></div>
+  <div class="sheet">
+    <div class="sheet-head">
+      <h2 data-i18n="comm_h">Grow the <span class="g">Language</span></h2>
+      <p data-i18n="comm_p">Record a Fante word or phrase, tell us what it means, and after review it becomes a button on this site — credited to you</p>
+    </div>
+    <div class="dev-wrap">
+
+      <div class="section-card">
+        <h3 data-i18n="comm_submit_h">🎙️ Contribute a Word or Phrase</h3>
+        <div class="keygen-form">
+          <div class="keygen-row">
+            <input id="cName" type="text" placeholder="Your name (shown as contributor)" data-i18n-ph="ph_name">
+            <input id="cEmail" type="email" placeholder="Email (to track your submission)" data-i18n-ph="ph_email">
+          </div>
+          <div class="keygen-row">
+            <input id="cEnglish" type="text" placeholder="English meaning — e.g. Good evening" data-i18n-ph="ph_english">
+            <input id="cFante" type="text" placeholder="Fante spelling — e.g. Maadwo" data-i18n-ph="ph_fante">
+          </div>
+          <div class="keygen-row">
+            <input id="cChinese" type="text" placeholder="中文意思 (optional Chinese meaning)">
+            <select id="cCategory" style="flex:1;padding:11px 16px;border-radius:12px;border:1.5px solid var(--line);background:var(--field);color:var(--ink);font-family:inherit;font-size:0.92rem"></select>
+          </div>
+          <div class="rec-row">
+            <button class="rec-btn" id="recBtn" onclick="toggleRecording()">🎙️ <span data-i18n="rec_start">Record your voice</span></button>
+            <span class="rec-status" id="recStatus"></span>
+            <audio id="recPreview" controls style="display:none;height:38px"></audio>
+          </div>
+          <button class="keygen-btn" onclick="submitContribution()" data-i18n="comm_submit_btn">Submit for Review</button>
+        </div>
+        <div class="key-result" id="cResult" style="border-color:var(--gh-gold)">
+          <div class="key-val" id="cResultText" style="color:var(--gh-gold)"></div>
+        </div>
+      </div>
+
+      <div class="section-card">
+        <h3 data-i18n="comm_track_h">📦 Track Your Submissions</h3>
+        <p style="font-size:0.82rem;color:var(--muted);margin-bottom:12px" data-i18n="comm_track_p">Every contribution goes through: Pending review → Approved &amp; live (or changes requested). Enter your email or tracking code:</p>
+        <div class="tester-row">
+          <input id="trackQ" type="text" placeholder="you@email.com or ctb_xxxxxxxx" style="flex:1;padding:11px 16px;border-radius:12px;border:1.5px solid var(--line);background:var(--field);color:var(--ink);font-family:inherit">
+          <button class="test-btn" onclick="trackMine()" data-i18n="comm_track_btn">Check Status</button>
+        </div>
+        <div id="trackResults" style="margin-top:14px"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN (vetting) — open with #admin -->
+<div class="view" id="view-admin">
+  <div class="bg-window" style="height:16vh"><span>Vetting Room 🔍</span></div>
+  <div class="sheet">
+    <div class="sheet-head"><h2>Review <span class="g">Queue</span></h2><p>Approve community contributions and resolve word feedback</p></div>
+    <div class="dev-wrap">
+      <div class="section-card">
+        <div class="tester-row">
+          <input id="adminKey" type="password" placeholder="Admin key" style="flex:1;padding:11px 16px;border-radius:12px;border:1.5px solid var(--line);background:var(--field);color:var(--ink);font-family:inherit">
+          <button class="test-btn" onclick="loadAdminQueue()">Load Queue</button>
+        </div>
+        <div id="adminOut" style="margin-top:14px"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -604,6 +700,52 @@ function toggleTheme() {
   applyTheme((localStorage.getItem('fanteTheme') || 'light') === 'dark' ? 'light' : 'dark');
 }
 applyTheme(localStorage.getItem('fanteTheme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+
+/* ══ LANGUAGE (English / 中文) ═══════════════════════════════ */
+let LANG = localStorage.getItem('fanteLang') || 'en';
+let ZH = {};           // id -> Chinese gloss (loaded from /zh.json)
+const I18N = {
+  nav_home: ['Home','首页'], nav_quiz: ['Quiz','测验'], nav_favs: ['Favorites','收藏'],
+  nav_pricing: ['Pricing','价格'], nav_community: ['Community','社区'], nav_dev: ['Developer','开发者'],
+  hero_sub: ["906 words & phrases with native audio — the living language of Ghana's Central Coast. Akwaaba. 🇬🇭",
+             '906个单词和短语，配有母语者语音 — 加纳中部海岸的活语言。欢迎！🇬🇭'],
+  hero_cta1: ['Start Learning ↓','开始学习 ↓'], hero_cta2: ['Take the Quiz','参加测验'],
+  browse_h: ['Explore the <span class="g">Language</span>','探索<span class="g">芳蒂语</span>'],
+  browse_p: ['Tap any word to hear it spoken by a native speaker','点击任何单词，听母语者发音'],
+  comm_window: ['Your voice, our language 🎙️','你的声音，我们的语言 🎙️'],
+  comm_h: ['Grow the <span class="g">Language</span>','共建<span class="g">语言宝库</span>'],
+  comm_p: ['Record a Fante word or phrase, tell us what it means, and after review it becomes a button on this site — credited to you',
+           '录制一个芳蒂语单词或短语，告诉我们它的意思。审核通过后，它将成为本网站上的一个按钮 — 并署上你的名字'],
+  comm_submit_h: ['🎙️ Contribute a Word or Phrase','🎙️ 贡献单词或短语'],
+  comm_submit_btn: ['Submit for Review','提交审核'],
+  comm_track_h: ['📦 Track Your Submissions','📦 查询提交状态'],
+  comm_track_p: ['Every contribution goes through: Pending review → Approved & live (or changes requested). Enter your email or tracking code:',
+                 '每个贡献都会经过：待审核 → 批准上线（或要求修改）。输入你的邮箱或跟踪码：'],
+  comm_track_btn: ['Check Status','查询状态'],
+  rec_start: ['Record your voice','录制语音'],
+  quiz_label: ['What is the Fante word for…','这个词的芳蒂语是…'],
+  search_ph: ['Search English or Fante...','搜索英文、中文或芳蒂语...'],
+  ph_name: ['Your name (shown as contributor)','你的名字（作为贡献者显示）'],
+  ph_email: ['Email (to track your submission)','邮箱（用于跟踪提交）'],
+  ph_english: ['English meaning — e.g. Good evening','英文意思 — 例如 Good evening'],
+  ph_fante: ['Fante spelling — e.g. Maadwo','芳蒂语拼写 — 例如 Maadwo'],
+};
+function t(key) { const e = I18N[key]; return e ? e[LANG === 'zh' ? 1 : 0] : key; }
+function applyLang() {
+  document.querySelectorAll('[data-i18n]').forEach(el => { const k = el.dataset.i18n; if (I18N[k]) el.innerHTML = t(k); });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => { const k = el.dataset.i18nPh; if (I18N[k]) el.placeholder = t(k); });
+  const hero = document.getElementById('heroTitle');
+  if (hero) hero.innerHTML = LANG === 'zh' ? '回到你的根，<br><span class="gold">发现芳蒂语。</span>' : 'Return to your roots,<br><span class="gold">Discover Fante.</span>';
+  const si = document.getElementById('searchInput'); if (si) si.placeholder = t('search_ph');
+  const lb = document.getElementById('langBtn'); if (lb) lb.textContent = LANG === 'zh' ? 'EN' : '中文';
+  document.documentElement.lang = LANG === 'zh' ? 'zh-CN' : 'en';
+}
+function toggleLang() {
+  LANG = LANG === 'zh' ? 'en' : 'zh';
+  localStorage.setItem('fanteLang', LANG);
+  applyLang();
+  if (typeof filterWords === 'function' && allWords.length) filterWords();
+}
 
 /* ══ DAILY FREE-PLAY GATE (10/day, resets at midnight) ═════ */
 const FREE_PLAYS = 10;
@@ -826,6 +968,12 @@ function wordEmoji(w) {
 async function init() {
   const r = await fetch('/data.json');
   allWords = await r.json();
+  // Chinese glosses + community words (non-blocking failures)
+  try { ZH = await (await fetch('/zh.json')).json(); } catch (e) {}
+  try {
+    const cw = await (await fetch('/api/community/words')).json();
+    (cw.words || []).forEach(w => allWords.push(w));
+  } catch (e) {}
   const cats = ['all', ...[...new Set(allWords.map(w=>w.category).filter(Boolean))].sort()];
   const bar = document.getElementById('catBar');
   cats.forEach(cat => {
@@ -836,13 +984,18 @@ async function init() {
     b.onclick = () => selectCat(cat);
     bar.appendChild(b);
   });
+  // community category select
+  const sel = document.getElementById('cCategory');
+  if (sel) sel.innerHTML = ['community', ...cats.filter(c=>c!=='all')].map(c=>`<option value="${c}">${CAT[c]||c}</option>`).join('');
   updateKeyChip();
   updatePlaysTag();
+  applyLang();
   filterWords();
   buildDocs();
   buildIntegrations();
   initTilt();
   checkPaymentReturn();
+  if (location.hash === '#admin') showView('admin');
 }
 
 function initTilt() {
@@ -864,12 +1017,156 @@ function showView(name) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('view-' + name).classList.add('active');
-  const idx = ['browse','quiz','favs','pricing','developer'].indexOf(name);
+  const idx = ['browse','quiz','favs','pricing','community','developer'].indexOf(name);
   if (idx >= 0) document.querySelectorAll('.nav-btn')[idx].classList.add('active');
   if (name === 'quiz') startQuiz();
   if (name === 'favs') renderFavs('');
   if (name === 'pricing') loadPlans();
   window.scrollTo({ top: 0 });
+}
+
+/* ══ COMMUNITY: recording, submit, tracking, feedback ═══════ */
+let mediaRec = null, recChunks = [], recBlob = null;
+async function toggleRecording() {
+  const btn = document.getElementById('recBtn'), st = document.getElementById('recStatus');
+  if (mediaRec && mediaRec.state === 'recording') { mediaRec.stop(); return; }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    recChunks = [];
+    mediaRec = new MediaRecorder(stream, MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? { mimeType: 'audio/webm;codecs=opus' } : undefined);
+    mediaRec.ondataavailable = e => recChunks.push(e.data);
+    mediaRec.onstop = () => {
+      stream.getTracks().forEach(tr => tr.stop());
+      recBlob = new Blob(recChunks, { type: mediaRec.mimeType || 'audio/webm' });
+      const p = document.getElementById('recPreview');
+      p.src = URL.createObjectURL(recBlob); p.style.display = 'inline-block';
+      btn.classList.remove('recording'); btn.innerHTML = '🔁 <span>Re-record</span>';
+      st.textContent = '✓ ' + Math.round(recBlob.size/1024) + 'KB recorded';
+    };
+    mediaRec.start();
+    btn.classList.add('recording'); btn.innerHTML = '⏹ <span>Stop recording</span>';
+    st.textContent = 'Recording… speak clearly, then press stop';
+    setTimeout(() => { if (mediaRec && mediaRec.state === 'recording') mediaRec.stop(); }, 15000); // 15s cap
+  } catch (e) { st.textContent = '⚠ Microphone permission needed'; }
+}
+
+async function submitContribution() {
+  const g = id => document.getElementById(id).value.trim();
+  const out = document.getElementById('cResult'), txt = document.getElementById('cResultText');
+  if (!g('cName') || !g('cEnglish') || !g('cFante')) { alert('Name, English meaning and Fante spelling are required.'); return; }
+  let audio_b64 = null;
+  if (recBlob) {
+    if (recBlob.size > 400 * 1024) { alert('Recording too large — keep it under ~12 seconds.'); return; }
+    audio_b64 = await new Promise(res => { const fr = new FileReader(); fr.onload = () => res(fr.result.split(',')[1]); fr.readAsDataURL(recBlob); });
+  }
+  const r = await fetch('/api/community/submit', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ contributor: g('cName'), email: g('cEmail'), english: g('cEnglish'), fante: g('cFante'), chinese: g('cChinese'), category: document.getElementById('cCategory').value, audio_b64 }) });
+  const data = await r.json();
+  out.classList.add('show');
+  if (data.success) {
+    txt.innerHTML = `🎉 ${data.message}<br>Tracking code: <b>${data.tracking}</b> — save it! Status: <span class="status-chip st-pending">PENDING REVIEW</span>`;
+    if (g('cEmail')) localStorage.setItem('fanteContribEmail', g('cEmail'));
+    ['cEnglish','cFante','cChinese'].forEach(i => document.getElementById(i).value = '');
+    recBlob = null; document.getElementById('recPreview').style.display = 'none';
+    document.getElementById('recBtn').innerHTML = '🎙️ <span>' + t('rec_start') + '</span>';
+    document.getElementById('recStatus').textContent = '';
+  } else txt.textContent = '⚠ ' + (data.error || 'Submission failed');
+}
+
+const STEPS = { pending: 1, changes_requested: 1, approved: 3, rejected: -1 };
+function progressHTML(status) {
+  const stage = STEPS[status] ?? 1;
+  const cls = i => status === 'rejected' ? (i === 0 ? 'done' : 'bad')
+    : i < stage ? 'done' : i === stage ? 'now' : '';
+  return `<div class="progress-line">
+    <span>Submitted</span><div class="p-step done"></div>
+    <span>Review</span><div class="p-step ${cls(1)}"></div>
+    <span>Approved</span><div class="p-step ${cls(2)}"></div>
+    <span>🚀 Live</span></div>`;
+}
+async function trackMine() {
+  const q = document.getElementById('trackQ').value.trim() || localStorage.getItem('fanteContribEmail') || '';
+  if (!q) { alert('Enter your email or tracking code'); return; }
+  const r = await fetch('/api/community/mine?q=' + encodeURIComponent(q));
+  const data = await r.json();
+  const box = document.getElementById('trackResults');
+  const subs = data.submissions || [];
+  if (!subs.length) { box.innerHTML = '<p style="color:var(--muted);font-size:0.85rem">No submissions found for that email/code.</p>'; return; }
+  const LBL = { pending: 'PENDING REVIEW', approved: 'APPROVED · LIVE 🚀', changes_requested: 'CHANGES REQUESTED', rejected: 'NOT ACCEPTED' };
+  box.innerHTML = subs.map(s => `
+    <div class="track-item">
+      <b>${s.english}</b> → <i style="color:var(--gh-green)">${s.fante}</i>
+      <span class="status-chip st-${s.status}" style="float:right">${LBL[s.status] || s.status}</span>
+      ${s.review_note ? `<div style="font-size:0.78rem;color:var(--muted);margin-top:4px">📝 Reviewer: ${s.review_note}</div>` : ''}
+      ${progressHTML(s.status)}
+      <div style="font-size:0.68rem;color:var(--muted);margin-top:6px">${s.tracking} · ${new Date(s.created_at).toLocaleDateString()} ${s.has_audio ? '· 🎙️ audio attached' : ''}</div>
+    </div>`).join('');
+}
+
+async function flagWord(id) {
+  const w = allWords.find(x => x.id === id);
+  const msg = prompt(`Report a problem with "${w ? w.english : id}" — what needs fixing? (wrong audio, spelling, translation…)`);
+  if (!msg || !msg.trim()) return;
+  const r = await fetch('/api/feedback', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ word_id: id, word_label: w ? `${w.english} / ${w.fante}` : String(id), message: msg.trim(), email: localStorage.getItem('fanteContribEmail') || '' }) });
+  const data = await r.json();
+  alert(data.success ? '🙏 ' + data.message : '⚠ ' + (data.error || 'Failed'));
+}
+
+/* ══ ADMIN VETTING ══════════════════════════════════════════ */
+async function loadAdminQueue() {
+  const key = document.getElementById('adminKey').value.trim();
+  const out = document.getElementById('adminOut');
+  const r = await fetch('/api/admin/queue', { headers: { 'X-Admin-Key': key } });
+  if (!r.ok) { out.innerHTML = '<p style="color:var(--gh-red)">Unauthorized or error.</p>'; return; }
+  const data = await r.json();
+  sessionStorage.setItem('adminKey', key);
+  const subs = data.contributions || [], fb = data.feedback || [];
+  out.innerHTML =
+    `<h4 style="margin:10px 0">Contributions awaiting review (${subs.length})</h4>` +
+    (subs.length ? subs.map(c => `
+      <div class="track-item">
+        <b>${c.english}</b> → <i style="color:var(--gh-green)">${c.fante}</i> ${c.chinese ? '· <span style="color:var(--gh-blue)">'+c.chinese+'</span>' : ''}
+        <span class="status-chip st-${c.status}" style="float:right">${c.status}</span>
+        <div style="font-size:0.75rem;color:var(--muted)">by ${c.contributor} (${c.email||'no email'}) · ${c.category} · ${new Date(c.created_at).toLocaleString()}</div>
+        ${c.has_audio ? `<audio controls style="height:34px;margin-top:6px" data-aid="${c.id}"></audio>` : '<div style="font-size:0.75rem;color:var(--gh-red)">no audio</div>'}
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap">
+          <button class="test-btn" onclick="adminReview(${c.id},'approved')">✓ Approve & Deploy</button>
+          <button class="test-btn" style="background:var(--gh-blue);color:#fff" onclick="adminReview(${c.id},'changes_requested')">✎ Request changes</button>
+          <button class="test-btn" style="background:var(--gh-red);color:#fff" onclick="adminReview(${c.id},'rejected')">✕ Reject</button>
+        </div>
+      </div>`).join('') : '<p style="color:var(--muted);font-size:0.85rem">Queue is empty 🎉</p>') +
+    `<h4 style="margin:16px 0 10px">Open word feedback (${fb.length})</h4>` +
+    (fb.length ? fb.map(f => `
+      <div class="track-item">
+        <b>${f.word_label || '#'+f.word_id}</b>
+        <div style="font-size:0.85rem;margin:4px 0">${f.message}</div>
+        <div style="font-size:0.7rem;color:var(--muted)">${f.email||'anonymous'} · ${new Date(f.created_at).toLocaleString()}</div>
+        <div style="margin-top:6px;display:flex;gap:8px">
+          <button class="test-btn" onclick="adminFeedback(${f.id},'fixed')">✓ Fixed</button>
+          <button class="test-btn" style="background:var(--gh-red);color:#fff" onclick="adminFeedback(${f.id},'dismissed')">Dismiss</button>
+        </div>
+      </div>`).join('') : '<p style="color:var(--muted);font-size:0.85rem">No open feedback.</p>');
+  // audio needs the admin header, so fetch each as a blob
+  out.querySelectorAll('audio[data-aid]').forEach(async a => {
+    try { const res = await fetch('/api/admin/audio/' + a.dataset.aid, { headers: { 'X-Admin-Key': key } });
+      if (res.ok) a.src = URL.createObjectURL(await res.blob()); } catch (e) {}
+  });
+}
+async function adminReview(id, action) {
+  const note = action === 'approved' ? '' : (prompt('Note to the contributor (optional):') || '');
+  const r = await fetch('/api/admin/review', { method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Key': sessionStorage.getItem('adminKey') || '' },
+    body: JSON.stringify({ id, action, note }) });
+  const data = await r.json();
+  if (data.ok) { document.getElementById('adminKey').value = sessionStorage.getItem('adminKey'); loadAdminQueue(); }
+  else alert('Error: ' + (data.error || 'failed'));
+}
+async function adminFeedback(id, status) {
+  await fetch('/api/admin/feedback-close', { method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Admin-Key': sessionStorage.getItem('adminKey') || '' },
+    body: JSON.stringify({ id, status }) });
+  document.getElementById('adminKey').value = sessionStorage.getItem('adminKey'); loadAdminQueue();
 }
 
 function selectCat(cat) {
@@ -882,7 +1179,7 @@ function filterWords() {
   const q = document.getElementById('searchInput').value.toLowerCase().trim();
   filtered = allWords.filter(w => {
     const cm = activeCategory==='all' || w.category===activeCategory;
-    const sm = !q || w.english.toLowerCase().includes(q) || (w.fante||'').toLowerCase().includes(q);
+    const sm = !q || w.english.toLowerCase().includes(q) || (w.fante||'').toLowerCase().includes(q) || zhOf(w).includes(q);
     return cm && sm;
   });
   document.getElementById('countTag').textContent = filtered.length + ' words';
@@ -892,15 +1189,19 @@ function filterWords() {
 const CHUNK = 60;
 const gridState = {}; // gridId -> { words, shown }
 
+function zhOf(w) { return w.chinese || ZH[String(w.id)] || ''; }
 function cardHTML(w) {
+  const zh = LANG === 'zh' ? zhOf(w) : '';
   return `
     <div class="word-card${playingId===w.id?' playing':''}" id="wc-${w.id}" onclick="playWord(${w.id})">
       <div class="play-orb">${wordEmoji(w)}</div>
       <div class="wc-body">
-        <div class="wc-en">${w.english}</div>
+        <div class="wc-en">${w.english}${w.community?'<span class="comm-badge" title="Contributed by '+(w.contributor||'the community')+'">COMMUNITY</span>':''}</div>
+        ${zh?`<div class="wc-zh">${zh}</div>`:''}
         <div class="wc-ft">${w.fante||''}</div>
         <div class="wc-cat">${CAT[w.category]||w.category||''}</div>
       </div>
+      <button class="flag-btn" title="Report a problem with this word" onclick="event.stopPropagation();flagWord(${w.id})">⚑</button>
       <button class="fav-star${favorites.includes(w.id)?' on':''}" onclick="event.stopPropagation();toggleFav(${w.id})">★</button>
     </div>`;
 }
@@ -941,7 +1242,8 @@ function playWord(id) {
   playingId = id;
   const card = document.getElementById('wc-'+id);
   if (card) card.classList.add('playing');
-  const audio = new Audio('/audio/'+w.sound+'.mp3');
+  const src = id >= 100000 ? '/api/community/audio/' + (id - 100000) : '/audio/' + w.sound + '.mp3';
+  const audio = new Audio(src);
   currentAudio = audio;
   audio.play().catch(()=>{});
   audio.onended = () => {
@@ -994,8 +1296,8 @@ function renderQuiz() {
     <div class="quiz-prog">${idx+1} / ${words.length} — Score: ${score}</div>
     <div class="quiz-card-q">
       <div class="quiz-emoji">${wordEmoji(w)}</div>
-      <div class="quiz-label">What is the Fante word for…</div>
-      <div class="quiz-word">${w.english}</div>
+      <div class="quiz-label">${t('quiz_label')}</div>
+      <div class="quiz-word">${w.english}${LANG==='zh'&&zhOf(w)?`<div style="font-size:1.2rem;color:var(--gh-gold);margin-top:4px">${zhOf(w)}</div>`:''}</div>
       <button class="quiz-play" onclick="playWord(${w.id})">🔊 Listen</button>
     </div>
     <div class="quiz-opts" id="qOpts">
