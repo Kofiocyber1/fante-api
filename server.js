@@ -35,7 +35,7 @@ async function rpc(fn, args) {
 app.set('trust proxy', 1); // behind Render's proxy
 app.use(helmet({ contentSecurityPolicy: false })); // landing page uses inline styles/scripts
 app.use(cors());
-app.use(express.json({ limit: '10kb' }));
+app.use(express.json({ limit: '900kb' })); // community voice recordings arrive as base64
 app.use(express.static(path.join(__dirname, 'public')));
 
 const apiLimiter = rateLimit({
@@ -269,6 +269,73 @@ app.get('/api/pay/verify', asyncH(async (req, res) => {
     p_amount_ghs: data.data.amount / 100,
   });
   res.json({ success: true, kind: meta.kind, ...out });
+}));
+
+// ── Community contributions & feedback ───────────────────────────────────────
+const contribLimiter = rateLimit({ windowMs: 60 * 60 * 1000, limit: 30, standardHeaders: 'draft-7', legacyHeaders: false });
+
+app.post('/api/community/submit', contribLimiter, asyncH(async (req, res) => {
+  const { contributor, email, english, fante, chinese, category, audio_b64 } = req.body || {};
+  const out = await rpc('fante_submit_contribution', {
+    p_contributor: String(contributor || ''), p_email: String(email || ''),
+    p_english: String(english || ''), p_fante: String(fante || ''),
+    p_category: String(category || 'community'), p_audio_b64: audio_b64 || null,
+    p_chinese: String(chinese || ''),
+  });
+  res.json({ success: true, ...out, message: 'Medaase! Your contribution is in the review queue.' });
+}));
+
+app.get('/api/community/mine', asyncH(async (req, res) => {
+  const q = String(req.query.q || '').trim();
+  if (!q) return res.status(400).json({ error: 'Pass ?q=your-email or tracking code' });
+  res.json({ submissions: await rpc('fante_my_contributions', { p_query: q }) });
+}));
+
+app.get('/api/community/words', asyncH(async (req, res) => {
+  res.json({ words: await rpc('fante_community_words', {}) });
+}));
+
+app.get('/api/community/audio/:id', asyncH(async (req, res) => {
+  const b64 = await rpc('fante_community_audio', { p_id: Number(req.params.id) });
+  if (!b64) return res.status(404).json({ error: 'No audio' });
+  const buf = Buffer.from(b64, 'base64');
+  res.set('Content-Type', 'audio/webm').set('Cache-Control', 'public, max-age=86400').send(buf);
+}));
+
+app.post('/api/feedback', contribLimiter, asyncH(async (req, res) => {
+  const { word_id, word_label, message, email } = req.body || {};
+  await rpc('fante_submit_feedback', {
+    p_word_id: Number(word_id) || null, p_word_label: String(word_label || ''),
+    p_message: String(message || ''), p_email: String(email || ''),
+  });
+  res.json({ success: true, message: 'Thanks! We will look into it.' });
+}));
+
+// Admin (vetting) — requires X-Admin-Key header
+function adminKey(req, res) {
+  const k = req.headers['x-admin-key'];
+  if (!PAYMENT_SECRET || k !== PAYMENT_SECRET) { res.status(401).json({ error: 'unauthorized' }); return null; }
+  return k;
+}
+app.get('/api/admin/queue', asyncH(async (req, res) => {
+  const k = adminKey(req, res); if (!k) return;
+  res.json(await rpc('fante_admin_queue', { p_secret: k }));
+}));
+app.get('/api/admin/audio/:id', asyncH(async (req, res) => {
+  const k = adminKey(req, res); if (!k) return;
+  const b64 = await rpc('fante_admin_audio', { p_secret: k, p_id: Number(req.params.id) });
+  if (!b64) return res.status(404).json({ error: 'No audio' });
+  res.set('Content-Type', 'audio/webm').send(Buffer.from(b64, 'base64'));
+}));
+app.post('/api/admin/review', asyncH(async (req, res) => {
+  const k = adminKey(req, res); if (!k) return;
+  const { id, action, note } = req.body || {};
+  res.json(await rpc('fante_admin_review', { p_secret: k, p_id: Number(id), p_action: String(action), p_note: String(note || '') }));
+}));
+app.post('/api/admin/feedback-close', asyncH(async (req, res) => {
+  const k = adminKey(req, res); if (!k) return;
+  const { id, status } = req.body || {};
+  res.json(await rpc('fante_admin_feedback_close', { p_secret: k, p_id: Number(id), p_status: String(status) }));
 }));
 
 // ── Static audio, health, errors ──────────────────────────────────────────────
